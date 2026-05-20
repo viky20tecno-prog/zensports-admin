@@ -29,4 +29,5 @@ export type Permission =
   | 'view_audit_logs'
   | 'manage_admin_users'
   | 'view_analytics'
-  | 'impersonate';
+  | 'impersonate'
+  | 'delete_club';

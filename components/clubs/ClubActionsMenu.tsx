@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { MoreHorizontal, CreditCard, Clock, Ban, Unlock } from 'lucide-react';
+import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -14,33 +14,47 @@ interface Props {
   canChangePlan: boolean;
   canSuspend: boolean;
   canExtendTrial: boolean;
+  canDelete: boolean;
   onRefresh: () => void;
 }
 
-export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, onRefresh }: Props) {
+export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, onRefresh }: Props) {
   const [dialog, setDialog] = useState<'plan' | 'trial' | null>(null);
-  const [suspending, setSuspending] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function handleSuspend() {
     if (!confirm(`¿Suspender ${club.config.nombre}?`)) return;
-    setSuspending(true);
+    setBusy(true);
     await fetch(`/api/clubs/${club.slug}/suspend`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
-    setSuspending(false);
+    setBusy(false);
     onRefresh();
   }
 
   async function handleUnlock() {
     if (!confirm(`¿Reactivar ${club.config.nombre}?`)) return;
-    setSuspending(true);
+    setBusy(true);
     await fetch(`/api/clubs/${club.slug}/unlock`, { method: 'POST' });
-    setSuspending(false);
+    setBusy(false);
+    onRefresh();
+  }
+
+  async function handleDelete() {
+    const nombre = club.config.nombre;
+    if (!confirm(`⚠️ Esto eliminará permanentemente "${nombre}" y todos sus datos.\n\n¿Estás seguro?`)) return;
+    if (!confirm(`Confirma de nuevo: ¿eliminar "${nombre}" para siempre?`)) return;
+    setBusy(true);
+    await fetch(`/api/clubs/${club.slug}/delete`, { method: 'DELETE' });
+    setBusy(false);
     onRefresh();
   }
 
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="h-7 w-7 flex items-center justify-center rounded text-gray-500 hover:text-white hover:bg-white/10 disabled:opacity-50 transition-colors" disabled={suspending}>
+        <DropdownMenuTrigger
+          className="h-7 w-7 flex items-center justify-center rounded text-gray-500 hover:text-white hover:bg-white/10 disabled:opacity-50 transition-colors"
+          disabled={busy}
+        >
           <MoreHorizontal className="w-4 h-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-48">
@@ -66,6 +80,14 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
                   <Ban className="w-3.5 h-3.5" /> Suspender
                 </DropdownMenuItem>
               )}
+            </>
+          )}
+          {canDelete && (
+            <>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem onClick={handleDelete} className="gap-2 cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 font-medium">
+                <Trash2 className="w-3.5 h-3.5" /> Eliminar club
+              </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>

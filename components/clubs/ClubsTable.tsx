@@ -53,6 +53,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const canChangePlan   = canAccess(role, 'change_plan');
   const canSuspend      = canAccess(role, 'suspend_club');
   const canExtendTrial  = canAccess(role, 'extend_trial');
+  const canDelete       = canAccess(role, 'delete_club');
 
   const columns: ColumnDef<ClubWithMetrics>[] = [
     {
@@ -153,6 +154,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
           canChangePlan={canChangePlan}
           canSuspend={canSuspend}
           canExtendTrial={canExtendTrial}
+          canDelete={canDelete}
           onRefresh={refresh}
         />
       ),
