@@ -25,9 +25,12 @@ export async function GET(request: Request) {
   if (!clubs?.length) return NextResponse.json({ clubs: [], total: 0 });
 
   const slugs = clubs.map(c => c.slug);
+  const ids   = clubs.map(c => c.id);
+  const idToSlug: Record<string, string> = {};
+  clubs.forEach(c => { idToSlug[c.id] = c.slug; });
 
   const [{ data: playerRows }, { data: activityRows }] = await Promise.all([
-    adminDb.from('players').select('club_slug').in('club_slug', slugs),
+    adminDb.from('players').select('club_id').in('club_id', ids),
     adminDb
       .from('audit_logs')
       .select('entity_id')
@@ -36,7 +39,10 @@ export async function GET(request: Request) {
   ]);
 
   const playerCount: Record<string, number> = {};
-  (playerRows || []).forEach(p => { playerCount[p.club_slug] = (playerCount[p.club_slug] || 0) + 1; });
+  (playerRows || []).forEach(p => {
+    const slug = idToSlug[p.club_id];
+    if (slug) playerCount[slug] = (playerCount[slug] || 0) + 1;
+  });
   const recentSet = new Set((activityRows || []).map(a => a.entity_id));
 
   const enriched = clubs.map(club => {

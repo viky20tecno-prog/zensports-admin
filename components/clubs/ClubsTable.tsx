@@ -91,8 +91,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
       accessorKey: 'trial_days_left',
       header: 'Trial',
       cell: ({ row }) => {
-        const days = row.original.trial_days_left;
-        if (days === null) return <span className="text-gray-600 text-xs">—</span>;
+        const { trial_days_left: days, status } = row.original;
+        if (status === 'active') return <span className="text-gray-600 text-xs">—</span>;
+        if (days === null) return <span className="text-gray-500 text-xs">Sin fecha</span>;
         const color = days <= 0 ? 'text-red-400' : days <= 3 ? 'text-yellow-400' : 'text-gray-400';
         return <span className={`text-xs font-medium ${color}`}>{days <= 0 ? 'Expirado' : `${days}d`}</span>;
       },
