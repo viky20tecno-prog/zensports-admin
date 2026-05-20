@@ -4,6 +4,7 @@ import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel,
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
+import Link from 'next/link';
 import { Search, ArrowUpDown, Users, Activity, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -62,10 +63,10 @@ export function ClubsTable({ initialClubs, role }: Props) {
       cell: ({ row }) => {
         const c = row.original;
         return (
-          <div>
-            <div className="font-medium text-white text-sm">{c.config.nombre}</div>
+          <Link href={`/clubs/${c.slug}`} className="group block">
+            <div className="font-medium text-white text-sm group-hover:text-indigo-300 transition-colors">{c.config.nombre}</div>
             <div className="text-xs text-gray-500">{c.slug} · {c.config.ciudad || '—'}</div>
-          </div>
+          </Link>
         );
       },
     },

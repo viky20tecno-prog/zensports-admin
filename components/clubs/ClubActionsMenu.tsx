@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -15,19 +16,26 @@ interface Props {
   canSuspend: boolean;
   canExtendTrial: boolean;
   canDelete: boolean;
-  onRefresh: () => void;
+  onRefresh?: (() => void) | undefined;
+  redirectOnDelete?: string;
 }
 
-export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, onRefresh }: Props) {
+export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, onRefresh, redirectOnDelete }: Props) {
+  const router = useRouter();
   const [dialog, setDialog] = useState<'plan' | 'trial' | null>(null);
   const [busy, setBusy] = useState(false);
+
+  function doRefresh() {
+    if (onRefresh) onRefresh();
+    else router.refresh();
+  }
 
   async function handleSuspend() {
     if (!confirm(`¿Suspender ${club.config.nombre}?`)) return;
     setBusy(true);
     await fetch(`/api/clubs/${club.slug}/suspend`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
     setBusy(false);
-    onRefresh();
+    doRefresh();
   }
 
   async function handleUnlock() {
@@ -35,7 +43,7 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
     setBusy(true);
     await fetch(`/api/clubs/${club.slug}/unlock`, { method: 'POST' });
     setBusy(false);
-    onRefresh();
+    doRefresh();
   }
 
   async function handleDelete() {
@@ -45,7 +53,8 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
     setBusy(true);
     await fetch(`/api/clubs/${club.slug}/delete`, { method: 'DELETE' });
     setBusy(false);
-    onRefresh();
+    if (redirectOnDelete) router.push(redirectOnDelete);
+    else doRefresh();
   }
 
   return (
@@ -94,10 +103,10 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
       </DropdownMenu>
 
       {dialog === 'plan' && (
-        <EditPlanDialog club={club} open onClose={() => setDialog(null)} onSuccess={onRefresh} />
+        <EditPlanDialog club={club} open onClose={() => setDialog(null)} onSuccess={doRefresh} />
       )}
       {dialog === 'trial' && (
-        <ExtendTrialDialog club={club} open onClose={() => setDialog(null)} onSuccess={onRefresh} />
+        <ExtendTrialDialog club={club} open onClose={() => setDialog(null)} onSuccess={doRefresh} />
       )}
     </>
   );

@@ -55,19 +55,31 @@ export interface ClubWithMetrics extends Club {
   onboarding_pct: number;
 }
 
-export interface ClubDetail extends ClubWithMetrics {
-  recent_payments: Payment[];
-  audit_events: AuditEvent[];
+
+export interface Player {
+  id: string;
+  cedula: string;
+  nombre: string;
+  apellidos: string;
+  celular?: string;
+  activo: boolean;
+  created_at: string;
+  categoria?: string;
+  equipo?: string;
+  foto_url?: string;
+  posicion?: string;
+  numero_camiseta?: string;
 }
 
-export interface Payment {
+export interface Pago {
   id: string;
   cedula: string;
   monto: number;
   banco: string;
   concepto: string;
+  referencia?: string;
   estado_revision: string;
-  tipo_origen: string;
+  tipo_origen?: string;
   created_at: string;
 }
 
@@ -77,5 +89,12 @@ export interface AuditEvent {
   action: string;
   before_state: Record<string, unknown> | null;
   after_state: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
+}
+
+export interface ClubFullDetail extends ClubWithMetrics {
+  players: Player[];
+  pagos: Pago[];
+  audit_events: AuditEvent[];
 }
