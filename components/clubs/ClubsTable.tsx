@@ -4,7 +4,7 @@ import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel,
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
-import { Search, ArrowUpDown, Users, Activity } from 'lucide-react';
+import { Search, ArrowUpDown, Users, Activity, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ClubStatusBadge } from './ClubStatusBadge';
@@ -102,7 +102,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
     {
       accessorKey: 'player_count',
       header: ({ column }) => (
-        <button className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"
+        <button
+          title="Número de jugadores registrados en el club"
+          className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"
           onClick={() => column.toggleSorting()}>
           <Users className="w-3 h-3" /><ArrowUpDown className="w-3 h-3" />
         </button>
@@ -112,10 +114,18 @@ export function ClubsTable({ initialClubs, role }: Props) {
     {
       accessorKey: 'health_score',
       header: ({ column }) => (
-        <button className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"
-          onClick={() => column.toggleSorting()}>
-          <Activity className="w-3 h-3" /> Health
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"
+            onClick={() => column.toggleSorting()}>
+            <Activity className="w-3 h-3" /> Health
+          </button>
+          <span
+            title="Puntaje de salud del club (0–100). Se calcula con: onboarding completado (+20), jugadores registrados (+20), plan activo no-trial (+20), WhatsApp configurado (+15), trial vigente (+15), actividad reciente en 14 días (+10). Verde ≥80 · Amarillo ≥50 · Gris <50"
+            className="cursor-help">
+            <Info className="w-3 h-3 text-gray-600 hover:text-gray-400" />
+          </span>
+        </div>
       ),
       cell: ({ row }) => {
         const { health_score, health_label } = row.original;
@@ -130,7 +140,16 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'onboarding_pct',
-      header: 'Onb.',
+      header: () => (
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Onb.</span>
+          <span
+            title="Porcentaje del proceso de configuración inicial completado. Pasos: nombre del club, logo, color, WhatsApp, valor mensualidad, y marcar onboarding como completado."
+            className="cursor-help">
+            <Info className="w-3 h-3 text-gray-600 hover:text-gray-400" />
+          </span>
+        </div>
+      ),
       cell: ({ getValue }) => {
         const v = getValue() as number;
         return <span className={`text-xs font-medium ${v === 100 ? 'text-green-400' : 'text-gray-500'}`}>{v}%</span>;
