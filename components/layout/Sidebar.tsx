@@ -22,7 +22,7 @@ const NAV: NavItem[] = [
   { label: 'Clubes', href: '/clubs', icon: Building2, permission: 'view_clubs' },
   { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'view_analytics' },
   { label: 'Audit Logs', href: '/audit-logs', icon: ScrollText, permission: 'view_audit_logs' },
-  { label: 'Configuración', href: '/settings', icon: Settings },
+  { label: 'Administradores', href: '/settings/users', icon: Settings, permission: 'manage_admin_users' },
 ];
 
 interface SidebarProps {
