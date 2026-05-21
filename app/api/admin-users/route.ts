@@ -24,9 +24,14 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!canAccess(session.role, 'manage_admin_users')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
+  const VALID_ROLES = ['super_admin', 'comercial', 'soporte', 'finanzas', 'ops'];
+
   const { email, name, role, password } = await req.json();
   if (!email || !name || !role || !password) {
     return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+  }
+  if (!VALID_ROLES.includes(role)) {
+    return NextResponse.json({ error: `Rol inválido. Valores permitidos: ${VALID_ROLES.join(', ')}` }, { status: 400 });
   }
 
   const hash = await bcrypt.hash(password, 12);
