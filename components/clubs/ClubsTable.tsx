@@ -157,6 +157,41 @@ export function ClubsTable({ initialClubs, role }: Props) {
       },
     },
     {
+      id: 'billing',
+      header: 'Facturación',
+      cell: ({ row }) => {
+        const { status, config, trial_days_left } = row.original;
+        const plan = config.plan;
+        const price = PLAN_PRICE[plan];
+        if (status === 'active' && price > 0) {
+          return (
+            <div>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-400 bg-green-400/10 border border-green-400/20 rounded-full px-2 py-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                {formatCOP(price)}/mes
+              </span>
+            </div>
+          );
+        }
+        if (status === 'trial') {
+          const urgent = (trial_days_left ?? 99) <= 3;
+          return (
+            <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2 py-0.5 ${urgent ? 'text-yellow-400 bg-yellow-400/10 border border-yellow-400/20' : 'text-gray-400 bg-white/5 border border-white/10'}`}>
+              Trial
+            </span>
+          );
+        }
+        if (status === 'expired') {
+          return (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400 bg-red-400/10 border border-red-400/20 rounded-full px-2 py-0.5">
+              Sin pago
+            </span>
+          );
+        }
+        return <span className="text-xs text-gray-600">—</span>;
+      },
+    },
+    {
       accessorKey: 'created_at',
       header: ({ column }) => (
         <button className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"

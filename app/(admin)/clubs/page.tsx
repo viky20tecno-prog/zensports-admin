@@ -3,6 +3,7 @@ import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { computeHealthScore, getTrialDaysLeft, getClubStatus, getOnboardingPct } from '@/lib/health-score';
 import { ClubsTable } from '@/components/clubs/ClubsTable';
+import { SeedDemoButton } from '@/components/clubs/SeedDemoButton';
 import type { ClubWithMetrics } from '@/types/club';
 
 async function getClubs(): Promise<ClubWithMetrics[]> {
@@ -66,11 +67,14 @@ export default async function ClubsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">Clubes</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          {clubs.length} clubes registrados · {stats.active || 0} activos · {stats.trial || 0} en trial · {stats.expired || 0} expirados
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Clubes</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {clubs.length} clubes registrados · {stats.active || 0} activos · {stats.trial || 0} en trial · {stats.expired || 0} expirados
+          </p>
+        </div>
+        {session.role === 'super_admin' && <SeedDemoButton />}
       </div>
 
       <ClubsTable initialClubs={clubs} role={session.role} />
