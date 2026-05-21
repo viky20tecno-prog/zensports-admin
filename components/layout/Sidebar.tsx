@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Building2, BarChart3, ScrollText,
-  Settings, ShieldCheck, ChevronRight,
+  Settings, ShieldCheck, ChevronRight, UserPlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminRole } from '@/types/admin';
@@ -20,6 +20,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Clubes', href: '/clubs', icon: Building2, permission: 'view_clubs' },
+  { label: 'Leads', href: '/leads', icon: UserPlus, permission: 'view_clubs' },
   { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'view_analytics' },
   { label: 'Audit Logs', href: '/audit-logs', icon: ScrollText, permission: 'view_audit_logs' },
   { label: 'Administradores', href: '/settings/users', icon: Settings, permission: 'manage_admin_users' },

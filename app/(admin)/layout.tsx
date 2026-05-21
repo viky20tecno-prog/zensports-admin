@@ -6,6 +6,7 @@ import { Topbar } from '@/components/layout/Topbar';
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
   clubs: 'Gestión de Clubes',
+  leads: 'Leads',
   analytics: 'Analytics SaaS',
   'audit-logs': 'Audit Logs',
   settings: 'Configuración',
