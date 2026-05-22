@@ -57,6 +57,7 @@ export default function LeadsPage() {
     const params = new URLSearchParams({
       nombre: lead.nombre_club || lead.nombre,
       plan:   lead.plan_interes,
+      wa:     lead.whatsapp,
     });
     return `${base}?${params.toString()}`;
   };
