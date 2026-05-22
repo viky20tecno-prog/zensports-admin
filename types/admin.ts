@@ -30,4 +30,5 @@ export type Permission =
   | 'manage_admin_users'
   | 'view_analytics'
   | 'impersonate'
-  | 'delete_club';
+  | 'delete_club'
+  | 'reset_password';

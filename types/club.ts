@@ -53,6 +53,7 @@ export interface ClubWithMetrics extends Club {
   health_label: 'healthy' | 'warning' | 'inactive';
   status: ClubStatus;
   onboarding_pct: number;
+  owner_email?: string;
 }
 
 

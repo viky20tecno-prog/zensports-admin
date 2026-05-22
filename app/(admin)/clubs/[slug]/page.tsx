@@ -48,8 +48,12 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
   const has_recent_activity = (activityRows?.length || 0) > 0;
   const { score, label } = computeHealthScore({ club, player_count, has_recent_activity });
 
+  const { data: userData } = await adminDb.auth.admin.getUserById(club.owner_user_id);
+  const owner_email = userData?.user?.email;
+
   return {
     ...club,
+    owner_email,
     player_count,
     health_score: score,
     health_label: label,
@@ -121,6 +125,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           canSuspend={canAccess(role, 'suspend_club')}
           canExtendTrial={canAccess(role, 'extend_trial')}
           canDelete={canAccess(role, 'delete_club')}
+          canResetPassword={canAccess(role, 'reset_password')}
           onRefresh={undefined}
           redirectOnDelete="/clubs"
         />

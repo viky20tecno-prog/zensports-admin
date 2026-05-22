@@ -65,6 +65,9 @@ export function OverviewTab({ detail }: Props) {
               {plan} {price > 0 && <span className="text-gray-600 text-xs ml-1">{formatCOP(price)}/mes</span>}
             </span>
           } />
+          {detail.owner_email && (
+            <Row label="Email admin" value={<span className="font-mono text-xs">{detail.owner_email}</span>} />
+          )}
           <Row label="Ciudad"         value={cfg.ciudad || '—'} />
           <Row label="WhatsApp"       value={cfg.whatsapp || '—'} />
           <Row label="Mensualidad"    value={cfg.valor_mensualidad ? formatCOP(cfg.valor_mensualidad) : '—'} />

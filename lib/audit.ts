@@ -13,6 +13,8 @@ export type AuditAction =
   | 'ADMIN_LOGIN'
   | 'DEMO_SEEDED'
   | 'PAYMENT_REMINDER_SENT'
+  | 'RESET_PASSWORD_SENT'
+  | 'CHANGE_EMAIL'
   | 'CLUB_DELETED';
 
 interface WriteAuditLogParams {
