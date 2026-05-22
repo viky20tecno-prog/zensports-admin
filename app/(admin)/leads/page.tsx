@@ -137,7 +137,7 @@ export default function LeadsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/8">
-                {['Nombre', 'WhatsApp', 'Club', 'Ciudad', 'Plan', 'Fecha', 'Estado', ''].map(h => (
+                {['Nombre', 'WhatsApp', 'Email', 'Club', 'Ciudad', 'Plan', 'Fecha', 'Estado', ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -147,6 +147,7 @@ export default function LeadsPage() {
                 <tr key={lead.id} className={`border-b border-white/5 hover:bg-white/3 transition-colors ${lead.convertido ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-3 font-medium text-white">{lead.nombre}</td>
                   <td className="px-4 py-3 text-gray-400 font-mono text-xs">{lead.whatsapp}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{lead.email || <span className="text-gray-600">—</span>}</td>
                   <td className="px-4 py-3 text-gray-300">{lead.nombre_club || <span className="text-gray-600">—</span>}</td>
                   <td className="px-4 py-3 text-gray-400">{lead.ciudad || <span className="text-gray-600">—</span>}</td>
                   <td className="px-4 py-3">
