@@ -125,7 +125,7 @@ export default function LeadsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#0F1219] border border-white/8 rounded-xl overflow-hidden">
+      <div className="bg-[#0F1219] border border-white/8 rounded-xl overflow-hidden overflow-x-auto">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-500 text-sm">Cargando leads…</div>
         ) : visible.length === 0 ? (
@@ -137,8 +137,18 @@ export default function LeadsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/8">
-                {['Nombre', 'WhatsApp', 'Email', 'Club', 'Ciudad', 'Plan', 'Fecha', 'Estado', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                {[
+                  { label: 'Nombre',    cls: '' },
+                  { label: 'WhatsApp',  cls: '' },
+                  { label: 'Email',     cls: 'hidden md:table-cell' },
+                  { label: 'Club',      cls: '' },
+                  { label: 'Ciudad',    cls: 'hidden sm:table-cell' },
+                  { label: 'Plan',      cls: '' },
+                  { label: 'Fecha',     cls: 'hidden lg:table-cell' },
+                  { label: 'Estado',    cls: '' },
+                  { label: '',          cls: '' },
+                ].map(({ label, cls }) => (
+                  <th key={label} className={`px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap ${cls}`}>{label}</th>
                 ))}
               </tr>
             </thead>
@@ -146,17 +156,17 @@ export default function LeadsPage() {
               {visible.map(lead => (
                 <tr key={lead.id} className={`border-b border-white/5 hover:bg-white/3 transition-colors ${lead.convertido ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-3 font-medium text-white">{lead.nombre}</td>
-                  <td className="px-4 py-3 text-gray-400 font-mono text-xs">{lead.whatsapp}</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{lead.email || <span className="text-gray-600">—</span>}</td>
-                  <td className="px-4 py-3 text-gray-300">{lead.nombre_club || <span className="text-gray-600">—</span>}</td>
-                  <td className="px-4 py-3 text-gray-400">{lead.ciudad || <span className="text-gray-600">—</span>}</td>
+                  <td className="px-4 py-3 text-gray-400 font-mono text-xs whitespace-nowrap">{lead.whatsapp}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell max-w-[160px] truncate">{lead.email || <span className="text-gray-600">—</span>}</td>
+                  <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{lead.nombre_club || <span className="text-gray-600">—</span>}</td>
+                  <td className="px-4 py-3 text-gray-400 hidden sm:table-cell whitespace-nowrap">{lead.ciudad || <span className="text-gray-600">—</span>}</td>
                   <td className="px-4 py-3">
                     <span style={{ background: `${PLAN_COLOR[lead.plan_interes]}20`, color: PLAN_COLOR[lead.plan_interes], border: `1px solid ${PLAN_COLOR[lead.plan_interes]}40` }}
                       className="px-2 py-0.5 rounded-full text-xs font-semibold capitalize">
                       {lead.plan_interes}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(lead.created_at)}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap hidden lg:table-cell">{fmt(lead.created_at)}</td>
                   <td className="px-4 py-3">
                     {lead.convertido
                       ? <span className="flex items-center gap-1 text-green-400 text-xs font-medium"><CheckCircle2 className="w-3.5 h-3.5" /> Convertido</span>

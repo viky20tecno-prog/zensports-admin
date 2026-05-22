@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Building2, BarChart3, ScrollText,
-  Settings, ShieldCheck, ChevronRight, UserPlus,
+  Settings, ShieldCheck, ChevronRight, UserPlus, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminRole } from '@/types/admin';
@@ -29,9 +29,10 @@ const NAV: NavItem[] = [
 interface SidebarProps {
   role: AdminRole;
   name: string;
+  onClose?: () => void;
 }
 
-export function Sidebar({ role, name }: SidebarProps) {
+export function Sidebar({ role, name, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const visible = NAV.filter(item =>
@@ -39,10 +40,16 @@ export function Sidebar({ role, name }: SidebarProps) {
   );
 
   return (
-    <aside className="w-[220px] min-h-screen bg-[#0A0D14] border-r border-white/5 flex flex-col">
+    <aside className="w-[220px] h-screen bg-[#0A0D14] border-r border-white/5 flex flex-col">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/5">
         <div className="flex items-center gap-2.5">
+          {/* Close button — solo móvil */}
+          {onClose && (
+            <button onClick={onClose} className="lg:hidden ml-auto p-1 text-gray-500 hover:text-white transition absolute top-4 right-4">
+              <X className="w-4 h-4" />
+            </button>
+          )}
           <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
             <ShieldCheck className="w-4 h-4 text-indigo-400" />
           </div>

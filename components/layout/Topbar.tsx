@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { LogOut, Bell } from 'lucide-react';
+import { LogOut, Bell, Menu } from 'lucide-react';
 import type { AdminRole } from '@/types/admin';
 
 const ROLE_LABELS: Record<AdminRole, string> = {
@@ -22,9 +22,10 @@ const ROLE_COLORS: Record<AdminRole, string> = {
 interface TopbarProps {
   title: string;
   role: AdminRole;
+  onMenuClick?: () => void;
 }
 
-export function Topbar({ title, role }: TopbarProps) {
+export function Topbar({ title, role, onMenuClick }: TopbarProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -33,7 +34,14 @@ export function Topbar({ title, role }: TopbarProps) {
   }
 
   return (
-    <header className="h-14 border-b border-white/5 bg-[#080B12]/80 backdrop-blur-sm flex items-center px-6 gap-4 sticky top-0 z-30">
+    <header className="h-14 border-b border-white/5 bg-[#080B12]/80 backdrop-blur-sm flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-30">
+      {/* Hamburger — solo móvil */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
       <h1 className="text-sm font-semibold text-white flex-1 tracking-tight">{title}</h1>
 
       <div className="flex items-center gap-3">
