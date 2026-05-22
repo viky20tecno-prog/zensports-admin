@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { MessageCircle, RefreshCw, CheckCircle2, Clock, Search, Users } from 'lucide-react';
+import { MessageCircle, RefreshCw, CheckCircle2, Clock, Search, Users, X, Send } from 'lucide-react';
 
 interface Lead {
   id: string;
   nombre: string;
   whatsapp: string;
+  email: string | null;
   nombre_club: string | null;
   ciudad: string | null;
   plan_interes: string;
@@ -30,6 +31,7 @@ export default function LeadsPage() {
   const [filter, setFilter]     = useState<'all' | 'pending' | 'converted'>('all');
   const [search, setSearch]     = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [sendModal, setSendModal] = useState<Lead | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -42,11 +44,27 @@ export default function LeadsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const markConverted = async (id: string, value: boolean) => {
-    setUpdating(id);
-    await fetch('/api/leads', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, convertido: value }) });
+  const markConverted = async (lead: Lead, value: boolean) => {
+    setUpdating(lead.id);
+    await fetch('/api/leads', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: lead.id, convertido: value }) });
     setUpdating(null);
     load();
+    if (value) setSendModal(lead);
+  };
+
+  const registroLink = (lead: Lead) => {
+    const base = 'https://zensports.vercel.app/registro';
+    const params = new URLSearchParams({
+      nombre: lead.nombre_club || lead.nombre,
+      plan:   lead.plan_interes,
+    });
+    return `${base}?${params.toString()}`;
+  };
+
+  const waRegistro = (lead: Lead) => {
+    const link = registroLink(lead);
+    const msg = `¡Hola ${lead.nombre}! 👋 Fue un placer hablar contigo.\n\nAquí está tu enlace para activar tu prueba gratuita de 5 días en ZenSports 🚀\n\n👉 ${link}\n\nEs rápido, sin tarjeta de crédito. Cualquier duda estoy aquí. ¡Bienvenido al equipo! 🏆`;
+    return `https://wa.me/57${lead.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
   };
 
   const waLink = (wa: string, nombre: string, plan: string) => {
@@ -153,7 +171,7 @@ export default function LeadsPage() {
                       </a>
                       <button
                         disabled={updating === lead.id}
-                        onClick={() => markConverted(lead.id, !lead.convertido)}
+                        onClick={() => markConverted(lead, !lead.convertido)}
                         className="px-2 py-1.5 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-50">
                         {lead.convertido ? 'Desmarcar' : '✓ Convertido'}
                       </button>
@@ -165,6 +183,48 @@ export default function LeadsPage() {
           </table>
         )}
       </div>
+
+      {/* Modal envío enlace de registro */}
+      {sendModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSendModal(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative bg-[#0F1219] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSendModal(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X className="w-4 h-4" /></button>
+
+            <div className="mb-5">
+              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1 text-xs font-bold text-green-400 uppercase tracking-wide mb-3">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Lead convertido
+              </div>
+              <h3 className="text-white font-bold text-lg">Enviar enlace de registro</h3>
+              <p className="text-gray-400 text-sm mt-1">
+                Envía el enlace a <span className="text-white font-semibold">{sendModal.nombre}</span> para que active su prueba gratuita.
+              </p>
+            </div>
+
+            <div className="bg-white/5 rounded-xl p-3 mb-5 text-xs text-gray-300 leading-relaxed border border-white/8">
+              <p className="text-gray-500 text-[10px] uppercase tracking-wide font-bold mb-2">Vista previa del mensaje</p>
+              ¡Hola {sendModal.nombre}! 👋 Fue un placer hablar contigo.<br /><br />
+              Aquí está tu enlace para activar tu prueba gratuita de 5 días 🚀<br />
+              <span className="text-indigo-400 break-all">{registroLink(sendModal)}</span><br /><br />
+              Sin tarjeta de crédito. ¡Bienvenido! 🏆
+            </div>
+
+            <a
+              href={waRegistro(sendModal)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setSendModal(null)}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm text-white transition-opacity hover:opacity-90"
+              style={{ background: '#25D366', boxShadow: '0 4px 20px rgba(37,211,102,0.35)' }}
+            >
+              <Send className="w-4 h-4" /> Enviar por WhatsApp
+            </a>
+            <button onClick={() => setSendModal(null)} className="w-full mt-2 py-2 text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              Cerrar sin enviar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
