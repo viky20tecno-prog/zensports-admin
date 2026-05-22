@@ -125,7 +125,8 @@ export default function LeadsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#0F1219] border border-white/8 rounded-xl overflow-hidden overflow-x-auto">
+      <div className="bg-[#0F1219] border border-white/8 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-500 text-sm">Cargando leads…</div>
         ) : visible.length === 0 ? (
@@ -134,7 +135,7 @@ export default function LeadsPage() {
             <p className="text-sm">No hay leads {filter !== 'all' ? 'en este filtro' : 'aún'}</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-white/8">
                 {[
@@ -193,6 +194,7 @@ export default function LeadsPage() {
             </tbody>
           </table>
         )}
+        </div>
       </div>
 
       {/* Modal envío enlace de registro */}
