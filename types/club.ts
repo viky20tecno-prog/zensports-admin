@@ -94,8 +94,22 @@ export interface AuditEvent {
   created_at: string;
 }
 
+export interface BillingRecord {
+  id: string;
+  club_id: string;
+  club_slug: string;
+  monto: number;
+  periodo: string;
+  metodo: string;
+  referencia?: string | null;
+  notas?: string | null;
+  recorded_by: string;
+  created_at: string;
+}
+
 export interface ClubFullDetail extends ClubWithMetrics {
   players: Player[];
   pagos: Pago[];
   audit_events: AuditEvent[];
+  billing_records: BillingRecord[];
 }

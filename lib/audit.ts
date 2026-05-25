@@ -15,7 +15,9 @@ export type AuditAction =
   | 'PAYMENT_REMINDER_SENT'
   | 'RESET_PASSWORD_SENT'
   | 'CHANGE_EMAIL'
-  | 'CLUB_DELETED';
+  | 'CLUB_DELETED'
+  | 'BILLING_RECORDED'
+  | 'IMPERSONATE';
 
 interface WriteAuditLogParams {
   admin_id?: string;

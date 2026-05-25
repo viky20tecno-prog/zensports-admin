@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2, Mail, ExternalLink, KeyRound, X, Copy, Check, MessageCircle } from 'lucide-react';
+import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2, Mail, ExternalLink, KeyRound, X, Copy, Check, MessageCircle, UserCheck } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -23,11 +23,12 @@ interface Props {
   canExtendTrial: boolean;
   canDelete: boolean;
   canResetPassword?: boolean;
+  canImpersonate?: boolean;
   onRefresh?: (() => void) | undefined;
   redirectOnDelete?: string;
 }
 
-export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, canResetPassword, onRefresh, redirectOnDelete }: Props) {
+export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, canResetPassword, canImpersonate, onRefresh, redirectOnDelete }: Props) {
   const router = useRouter();
   const [dialog, setDialog] = useState<'plan' | 'trial' | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,6 +39,20 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
   const [newEmail, setNewEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
+
+  async function handleImpersonate() {
+    if (!confirm(`¿Impersonar a ${club.config.nombre}?\n\nSe abrirá el dashboard como si fueras el administrador del club. Esta acción queda registrada en auditoría.`)) return;
+    setBusy(true);
+    const res = await fetch(`/api/clubs/${club.slug}/impersonate`, { method: 'POST' });
+    setBusy(false);
+    if (res.ok) {
+      const { magic_link } = await res.json();
+      window.open(magic_link, '_blank', 'noopener,noreferrer');
+    } else {
+      const json = await res.json().catch(() => ({}));
+      alert(json.error || 'No se pudo generar el enlace de impersonación');
+    }
+  }
 
   async function handleSendReminder() {
     setBusy(true);
@@ -139,10 +154,18 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
         <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-52">
           {showDashboardLink && (
             <DropdownMenuItem
-              onClick={() => window.open('https://city-fc-dashboard-pi.vercel.app', '_blank', 'noopener,noreferrer')}
+              onClick={() => window.open('https://zensports.vercel.app', '_blank', 'noopener,noreferrer')}
               className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Ver dashboard
+            </DropdownMenuItem>
+          )}
+          {canImpersonate && (
+            <DropdownMenuItem
+              onClick={handleImpersonate}
+              className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10"
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Impersonar club
             </DropdownMenuItem>
           )}
           {(club.status === 'trial' || club.status === 'expired') && (

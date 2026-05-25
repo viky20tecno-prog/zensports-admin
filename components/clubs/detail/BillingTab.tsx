@@ -1,0 +1,206 @@
+'use client';
+import { useState } from 'react';
+import { Plus, X, TrendingUp } from 'lucide-react';
+import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
+import type { BillingRecord, ClubFullDetail } from '@/types/club';
+
+const MESES_ES: Record<string, string> = {
+  '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril',
+  '05': 'Mayo', '06': 'Junio', '07': 'Julio', '08': 'Agosto',
+  '09': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre',
+};
+
+function formatPeriodo(periodo: string) {
+  const [year, month] = periodo.split('-');
+  return `${MESES_ES[month] ?? month} ${year}`;
+}
+
+const METODOS = ['transferencia', 'efectivo', 'tarjeta', 'nequi', 'daviplata', 'otro'];
+
+interface Props {
+  detail: ClubFullDetail;
+  initialRecords: BillingRecord[];
+}
+
+export function BillingTab({ detail, initialRecords }: Props) {
+  const [records, setRecords] = useState<BillingRecord[]>(initialRecords);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const planPrice = PLAN_PRICE[detail.config.plan] ?? 0;
+  const totalCollected = records.reduce((s, r) => s + r.monto, 0);
+
+  const now = new Date();
+  const currentPeriodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const paidThisMonth = records.some(r => r.periodo === currentPeriodo);
+
+  const [form, setForm] = useState({
+    monto: planPrice > 0 ? String(planPrice) : '',
+    periodo: currentPeriodo,
+    metodo: 'transferencia',
+    referencia: '',
+    notas: '',
+  });
+
+  function setField(k: keyof typeof form, v: string) {
+    setForm(prev => ({ ...prev, [k]: v }));
+    setError('');
+  }
+
+  async function handleSubmit() {
+    if (!form.monto || !form.periodo) { setError('Monto y período son requeridos'); return; }
+    setSaving(true);
+    const res = await fetch(`/api/clubs/${detail.slug}/billing`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, monto: Number(form.monto) }),
+    });
+    setSaving(false);
+    if (res.ok) {
+      const { record } = await res.json();
+      setRecords(prev => [record, ...prev]);
+      setShowForm(false);
+      setForm({ monto: planPrice > 0 ? String(planPrice) : '', periodo: currentPeriodo, metodo: 'transferencia', referencia: '', notas: '' });
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setError(json.error || 'Error al guardar');
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Summary bar */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-white/8 bg-white/2 p-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Plan actual</p>
+          <p className="text-lg font-bold text-white capitalize">{detail.config.plan}</p>
+          {planPrice > 0 && <p className="text-xs text-gray-600 mt-0.5">{formatCOP(planPrice)}/mes</p>}
+        </div>
+        <div className="rounded-xl border border-white/8 bg-white/2 p-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total cobrado</p>
+          <p className="text-lg font-bold text-white">{formatCOP(totalCollected)}</p>
+          <p className="text-xs text-gray-600 mt-0.5">{records.length} pagos registrados</p>
+        </div>
+        <div className={`rounded-xl border p-4 ${paidThisMonth ? 'border-green-500/20 bg-green-500/5' : 'border-yellow-500/20 bg-yellow-500/5'}`}>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Mes actual</p>
+          <p className={`text-lg font-bold ${paidThisMonth ? 'text-green-400' : 'text-yellow-400'}`}>
+            {paidThisMonth ? 'Pagado' : 'Sin pago'}
+          </p>
+          <p className="text-xs text-gray-600 mt-0.5">{formatPeriodo(currentPeriodo)}</p>
+        </div>
+      </div>
+
+      {/* Header + add button */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4" /> Historial de suscripción
+        </h3>
+        <button
+          onClick={() => setShowForm(v => !v)}
+          className="flex items-center gap-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+        >
+          {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          {showForm ? 'Cancelar' : 'Registrar pago'}
+        </button>
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 space-y-3">
+          <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider">Nuevo pago de suscripción</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Período *</label>
+              <input
+                type="month"
+                value={form.periodo}
+                onChange={e => setField('periodo', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Monto *</label>
+              <input
+                type="number"
+                value={form.monto}
+                onChange={e => setField('monto', e.target.value)}
+                placeholder="0"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-indigo-500/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Método</label>
+              <select
+                value={form.metodo}
+                onChange={e => setField('metodo', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+              >
+                {METODOS.map(m => <option key={m} value={m} className="bg-[#0F1219]">{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Referencia</label>
+              <input
+                type="text"
+                value={form.referencia}
+                onChange={e => setField('referencia', e.target.value)}
+                placeholder="# transferencia"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-indigo-500/50"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Notas internas</label>
+            <input
+              type="text"
+              value={form.notas}
+              onChange={e => setField('notas', e.target.value)}
+              placeholder="Opcional"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-indigo-500/50"
+            />
+          </div>
+          {error && <p className="text-red-400 text-xs">{error}</p>}
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="w-full py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Guardando…' : 'Guardar pago'}
+          </button>
+        </div>
+      )}
+
+      {/* Records table */}
+      {records.length === 0 ? (
+        <div className="rounded-xl border border-white/8 py-14 text-center text-gray-600 text-sm">
+          Sin pagos de suscripción registrados
+        </div>
+      ) : (
+        <div className="rounded-xl border border-white/8 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-white/3 border-b border-white/8">
+              <tr>
+                {['Período', 'Monto', 'Método', 'Referencia', 'Registrado por', 'Fecha'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {records.map(r => (
+                <tr key={r.id} className="hover:bg-white/3 transition-colors">
+                  <td className="px-4 py-3 text-gray-200 font-medium">{formatPeriodo(r.periodo)}</td>
+                  <td className="px-4 py-3 text-white font-bold">{formatCOP(r.monto)}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs capitalize">{r.metodo}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs font-mono">{r.referencia || '—'}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

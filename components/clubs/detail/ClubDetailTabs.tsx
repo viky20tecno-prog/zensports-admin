@@ -7,13 +7,15 @@ import { PlayersTab } from './PlayersTab';
 import { PaymentsTab } from './PaymentsTab';
 import { AuditTab } from './AuditTab';
 import { NotesTab } from './NotesTab';
+import { BillingTab } from './BillingTab';
 
 const TABS = [
-  { id: 'overview',  label: 'Overview' },
-  { id: 'players',   label: 'Jugadores' },
-  { id: 'payments',  label: 'Pagos' },
-  { id: 'audit',     label: 'Auditoría' },
-  { id: 'notes',     label: 'Notas' },
+  { id: 'overview',   label: 'Overview' },
+  { id: 'players',    label: 'Jugadores' },
+  { id: 'payments',   label: 'Pagos' },
+  { id: 'billing',    label: 'Facturación' },
+  { id: 'audit',      label: 'Auditoría' },
+  { id: 'notes',      label: 'Notas' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
@@ -59,6 +61,7 @@ export function ClubDetailTabs({ detail, role }: Props) {
         {active === 'overview'  && <OverviewTab detail={detail} />}
         {active === 'players'   && <PlayersTab players={detail.players} />}
         {active === 'payments'  && <PaymentsTab pagos={detail.pagos} />}
+        {active === 'billing'   && <BillingTab detail={detail} initialRecords={detail.billing_records} />}
         {active === 'audit'     && <AuditTab events={detail.audit_events} />}
         {active === 'notes'     && <NotesTab slug={detail.slug} initialNotes={detail.admin_notes ?? ''} />}
       </div>

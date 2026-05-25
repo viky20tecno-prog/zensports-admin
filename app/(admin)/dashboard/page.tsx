@@ -7,6 +7,7 @@ import { KpiCard } from '@/components/dashboard/KpiCard';
 import { MrrChart } from '@/components/dashboard/MrrChart';
 import { GrowthChart } from '@/components/dashboard/GrowthChart';
 import { RecentActivityList } from '@/components/dashboard/RecentActivityList';
+import { ExpirationAlerts, type AlertClub } from '@/components/dashboard/ExpirationAlerts';
 
 async function getDashboardData() {
   const [{ data: clubs }, { data: auditEntries }] = await Promise.all([
@@ -22,6 +23,29 @@ async function getDashboardData() {
   });
 
   const arr = mrr * 12;
+
+  // Build expiration alerts
+  const nowTs = Date.now();
+  const expiringSoon: AlertClub[] = [];
+  const expired: AlertClub[] = [];
+
+  (clubs || []).forEach(club => {
+    const status = getClubStatus(club as never);
+    if (status !== 'trial' && status !== 'expired') return;
+    const trialEnd = club.config?.trial_ends_at ? new Date(club.config.trial_ends_at).getTime() : null;
+    if (!trialEnd) return;
+    const daysLeft = Math.ceil((trialEnd - nowTs) / 86400000);
+    const entry: AlertClub = {
+      slug: club.slug,
+      nombre: club.config?.nombre || club.slug,
+      trial_ends_at: club.config.trial_ends_at,
+      days_left: Math.max(0, daysLeft),
+    };
+    if (daysLeft < 0) expired.push(entry);
+    else if (daysLeft <= 7) expiringSoon.push(entry);
+  });
+
+  expiringSoon.sort((a, b) => a.days_left - b.days_left);
 
   const now = new Date();
   const growth = Array.from({ length: 6 }, (_, i) => {
@@ -46,6 +70,8 @@ async function getDashboardData() {
     total: (clubs || []).length,
     growth,
     auditEntries: auditEntries || [],
+    expiringSoon,
+    expired,
   };
 }
 
@@ -53,7 +79,7 @@ export default async function DashboardPage() {
   const session = await getAdminSession();
   if (!session) redirect('/login');
 
-  const { active, trial, mrr, arr, total, growth, auditEntries } = await getDashboardData();
+  const { active, trial, mrr, arr, total, growth, auditEntries, expiringSoon, expired } = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -75,6 +101,8 @@ export default async function DashboardPage() {
         <MrrChart data={growth} />
         <GrowthChart data={growth} />
       </div>
+
+      <ExpirationAlerts expiringSoon={expiringSoon} expired={expired} />
 
       <RecentActivityList entries={auditEntries} />
     </div>

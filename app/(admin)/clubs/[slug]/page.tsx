@@ -8,7 +8,7 @@ import { ClubStatusBadge } from '@/components/clubs/ClubStatusBadge';
 import { ClubActionsMenu } from '@/components/clubs/ClubActionsMenu';
 import { ClubDetailTabs } from '@/components/clubs/detail/ClubDetailTabs';
 import { canAccess } from '@/lib/rbac';
-import type { ClubFullDetail, Player, Pago, AuditEvent } from '@/types/club';
+import type { ClubFullDetail, Player, Pago, AuditEvent, BillingRecord } from '@/types/club';
 
 async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
   const { data: club, error } = await adminDb.from('clubs').select('*').eq('slug', slug).single();
@@ -19,6 +19,7 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
     { data: activityRows },
     { data: pagoRows },
     { data: auditRows },
+    { data: billingRows },
   ] = await Promise.all([
     adminDb
       .from('players')
@@ -42,6 +43,12 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
       .eq('entity_id', slug)
       .order('created_at', { ascending: false })
       .limit(100),
+    adminDb
+      .from('admin_billing')
+      .select('*')
+      .eq('club_id', club.id)
+      .order('periodo', { ascending: false })
+      .limit(24),
   ]);
 
   const player_count = playerRows?.length || 0;
@@ -63,6 +70,7 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
     players: (playerRows || []) as Player[],
     pagos: (pagoRows || []) as Pago[],
     audit_events: (auditRows || []) as AuditEvent[],
+    billing_records: (billingRows || []) as BillingRecord[],
   };
 }
 
@@ -126,6 +134,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           canExtendTrial={canAccess(role, 'extend_trial')}
           canDelete={canAccess(role, 'delete_club')}
           canResetPassword={canAccess(role, 'reset_password')}
+          canImpersonate={canAccess(role, 'impersonate')}
           onRefresh={undefined}
           redirectOnDelete="/clubs"
         />
