@@ -55,6 +55,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const canSuspend      = canAccess(role, 'suspend_club');
   const canExtendTrial  = canAccess(role, 'extend_trial');
   const canDelete       = canAccess(role, 'delete_club');
+  const canImpersonate  = canAccess(role, 'impersonate');
 
   const columns: ColumnDef<ClubWithMetrics>[] = [
     {
@@ -210,6 +211,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
           canSuspend={canSuspend}
           canExtendTrial={canExtendTrial}
           canDelete={canDelete}
+          canImpersonate={canImpersonate}
           onRefresh={refresh}
         />
       ),
