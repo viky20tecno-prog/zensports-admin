@@ -5,7 +5,7 @@ import {
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
 import Link from 'next/link';
-import { Search, ArrowUpDown, Users, Activity, Info } from 'lucide-react';
+import { Search, ArrowUpDown, Users, Activity, Info, Download, Mail, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ClubStatusBadge } from './ClubStatusBadge';
@@ -40,6 +40,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkResult, setBulkResult] = useState('');
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -57,7 +60,48 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const canDelete       = canAccess(role, 'delete_club');
   const canImpersonate  = canAccess(role, 'impersonate');
 
+  function toggleSelect(slug: string) {
+    setSelected(prev => { const n = new Set(prev); n.has(slug) ? n.delete(slug) : n.add(slug); return n; });
+  }
+
+  function toggleAll(rows: ClubWithMetrics[]) {
+    if (selected.size === rows.length) setSelected(new Set());
+    else setSelected(new Set(rows.map(r => r.slug)));
+  }
+
+  async function handleBulkReminder() {
+    setBulkBusy(true); setBulkResult('');
+    const res = await fetch('/api/clubs/bulk-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send_reminder', slugs: Array.from(selected) }),
+    });
+    const json = await res.json();
+    setBulkResult(`✓ Recordatorio enviado a ${json.succeeded} de ${json.total} clubs`);
+    setBulkBusy(false);
+    setSelected(new Set());
+  }
+
+  function handleExport() {
+    window.open('/api/clubs/export', '_blank');
+  }
+
   const columns: ColumnDef<ClubWithMetrics>[] = [
+    {
+      id: 'select',
+      header: ({ table: t }) => {
+        const rows = t.getRowModel().rows.map(r => r.original);
+        const allSelected = rows.length > 0 && selected.size === rows.length;
+        return (
+          <input type="checkbox" checked={allSelected} onChange={() => toggleAll(rows)}
+            className="w-3.5 h-3.5 accent-indigo-500 cursor-pointer" />
+        );
+      },
+      cell: ({ row }) => (
+        <input type="checkbox" checked={selected.has(row.original.slug)} onChange={() => toggleSelect(row.original.slug)}
+          className="w-3.5 h-3.5 accent-indigo-500 cursor-pointer" onClick={e => e.stopPropagation()} />
+      ),
+    },
     {
       accessorKey: 'config.nombre',
       header: 'Club',
@@ -262,7 +306,31 @@ export function ClubsTable({ initialClubs, role }: Props) {
           ))}
         </div>
         {loading && <span className="text-xs text-gray-500 animate-pulse">Actualizando...</span>}
+        <button onClick={handleExport}
+          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+          <Download className="w-3.5 h-3.5" /> Exportar CSV
+        </button>
       </div>
+
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-indigo-500/20 bg-indigo-500/5">
+          <span className="text-sm font-medium text-indigo-300">{selected.size} seleccionados</span>
+          <div className="flex gap-2 ml-2">
+            <button onClick={handleBulkReminder} disabled={bulkBusy}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors disabled:opacity-50">
+              <Mail className="w-3.5 h-3.5" />
+              {bulkBusy ? 'Enviando...' : 'Enviar recordatorio'}
+            </button>
+          </div>
+          {bulkResult && <span className="text-xs text-green-400 ml-2">{bulkResult}</span>}
+          <button onClick={() => { setSelected(new Set()); setBulkResult(''); }}
+            className="ml-auto text-gray-500 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
 
       {/* Table */}
       <div className="rounded-xl border border-white/8 overflow-hidden">

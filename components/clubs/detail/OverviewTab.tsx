@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
+import { formatCOP, formatDate, formatRelative, PLAN_PRICE } from '@/lib/utils';
 import { MODULE_KEYS, MODULE_LABELS, isModuleUnlocked } from '@/lib/plan-modules';
 import type { ClubFullDetail } from '@/types/club';
 import type { ModuleKey } from '@/lib/plan-modules';
@@ -151,6 +151,28 @@ export function OverviewTab({ detail }: Props) {
           <HealthRow label="WhatsApp configurado"        pts={15} earned={cfg.whatsapp ? 15 : 0} />
           <HealthRow label="Actividad últimos 14 días"   pts={10} earned={detail.health_score >= 10 ? 10 : 0} />
         </ul>
+      </section>
+
+      {/* Métricas de uso */}
+      <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Uso real</h3>
+        <dl className="space-y-2 text-sm">
+          <Row label="Jugadores activos" value={
+            <span>{detail.players.filter(p => p.activo).length} <span className="text-gray-600 text-xs">/ {detail.player_count} total</span></span>
+          } />
+          <Row label="Pagos este mes" value={(() => {
+            const now = new Date();
+            const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const count = detail.pagos.filter(p => p.created_at.startsWith(periodo)).length;
+            return <span>{count} pagos</span>;
+          })()} />
+          <Row label="Última actividad" value={
+            detail.audit_events.length > 0
+              ? <span className="text-xs">{formatRelative(detail.audit_events[0].created_at)}</span>
+              : <span className="text-gray-600">Sin actividad</span>
+          } />
+          <Row label="Acciones admin" value={<span>{detail.audit_events.length}</span>} />
+        </dl>
       </section>
 
       {/* Onboarding checklist */}
