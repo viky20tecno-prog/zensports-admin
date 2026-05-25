@@ -149,41 +149,58 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
         >
           <MoreHorizontal className="w-4 h-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-52">
+        <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-64">
           {canImpersonate && (
-            <DropdownMenuItem
-              onClick={handleImpersonate}
-              className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10"
-            >
-              <UserCheck className="w-3.5 h-3.5" /> Impersonar club
+            <DropdownMenuItem onClick={handleImpersonate} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <UserCheck className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">Impersonar club</p>
+                <p className="text-xs text-gray-500 mt-1">Accede al dashboard como el admin del club</p>
+              </div>
             </DropdownMenuItem>
           )}
           {(club.status === 'trial' || club.status === 'expired') && (
-            <DropdownMenuItem
-              onClick={handleSendReminder}
-              className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10"
-            >
-              <Mail className="w-3.5 h-3.5" />
-              {reminderSent ? '✓ Enviado' : 'Enviar recordatorio'}
+            <DropdownMenuItem onClick={handleSendReminder} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <Mail className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">{reminderSent ? '✓ Enviado' : 'Enviar recordatorio'}</p>
+                <p className="text-xs text-gray-500 mt-1">Notifica al club sobre su vencimiento de trial</p>
+              </div>
             </DropdownMenuItem>
           )}
           {canChangePlan && (
-            <DropdownMenuItem onClick={() => setDialog('plan')} className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10">
-              <CreditCard className="w-3.5 h-3.5" /> Cambiar plan
+            <DropdownMenuItem onClick={() => setDialog('plan')} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <CreditCard className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">Cambiar plan</p>
+                <p className="text-xs text-gray-500 mt-1">Sube o baja el plan de suscripción</p>
+              </div>
             </DropdownMenuItem>
           )}
           {canExtendTrial && (club.status === 'trial' || club.status === 'expired') && (
-            <DropdownMenuItem onClick={() => setDialog('trial')} className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10">
-              <Clock className="w-3.5 h-3.5" /> Extender trial
+            <DropdownMenuItem onClick={() => setDialog('trial')} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">Extender trial</p>
+                <p className="text-xs text-gray-500 mt-1">Agrega días al período de prueba</p>
+              </div>
             </DropdownMenuItem>
           )}
           {canResetPassword && (
             <>
-              <DropdownMenuItem onClick={() => { setNewEmail(club.owner_email || ''); setEmailError(''); setEmailDialog(true); }} className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10">
-                <Mail className="w-3.5 h-3.5" /> Cambiar email
+              <DropdownMenuItem onClick={() => { setNewEmail(club.owner_email || ''); setEmailError(''); setEmailDialog(true); }} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+                <Mail className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium leading-none">Cambiar email</p>
+                  <p className="text-xs text-gray-500 mt-1">Actualiza el correo de acceso del admin</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleResetPassword} className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10">
-                <KeyRound className="w-3.5 h-3.5" /> Restablecer contraseña
+              <DropdownMenuItem onClick={handleResetPassword} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+                <KeyRound className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium leading-none">Restablecer contraseña</p>
+                  <p className="text-xs text-gray-500 mt-1">Genera un enlace de recuperación</p>
+                </div>
               </DropdownMenuItem>
             </>
           )}
@@ -191,12 +208,20 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
             <>
               <DropdownMenuSeparator className="bg-white/10" />
               {club.status === 'suspended' ? (
-                <DropdownMenuItem onClick={handleUnlock} className="gap-2 cursor-pointer text-green-400 hover:bg-green-500/10 focus:bg-green-500/10">
-                  <Unlock className="w-3.5 h-3.5" /> Reactivar
+                <DropdownMenuItem onClick={handleUnlock} className="gap-3 cursor-pointer text-green-400 hover:bg-green-500/10 focus:bg-green-500/10 items-start py-2.5">
+                  <Unlock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium leading-none">Reactivar</p>
+                    <p className="text-xs text-green-600 mt-1">Restaura el acceso al club</p>
+                  </div>
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={handleSuspend} className="gap-2 cursor-pointer text-red-400 hover:bg-red-500/10 focus:bg-red-500/10">
-                  <Ban className="w-3.5 h-3.5" /> Suspender
+                <DropdownMenuItem onClick={handleSuspend} className="gap-3 cursor-pointer text-red-400 hover:bg-red-500/10 focus:bg-red-500/10 items-start py-2.5">
+                  <Ban className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium leading-none">Suspender</p>
+                    <p className="text-xs text-red-700 mt-1">Bloquea el acceso al dashboard</p>
+                  </div>
                 </DropdownMenuItem>
               )}
             </>
@@ -204,8 +229,12 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
           {canDelete && (
             <>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem onClick={handleDelete} className="gap-2 cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 font-medium">
-                <Trash2 className="w-3.5 h-3.5" /> Eliminar club
+              <DropdownMenuItem onClick={handleDelete} className="gap-3 cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 items-start py-2.5">
+                <Trash2 className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium leading-none">Eliminar club</p>
+                  <p className="text-xs text-red-800 mt-1">Borra permanentemente todos los datos</p>
+                </div>
               </DropdownMenuItem>
             </>
           )}
