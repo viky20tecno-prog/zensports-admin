@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2, Mail, ExternalLink, KeyRound, X, Copy, Check, MessageCircle, UserCheck } from 'lucide-react';
+import { MoreHorizontal, CreditCard, Clock, Ban, Unlock, Trash2, Mail, KeyRound, X, Copy, Check, MessageCircle, UserCheck } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -108,8 +108,6 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
     }
   }
 
-  const showDashboardLink = !!club.slug;
-
   function doRefresh() {
     if (onRefresh) onRefresh();
     else router.refresh();
@@ -152,14 +150,6 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
           <MoreHorizontal className="w-4 h-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-52">
-          {showDashboardLink && (
-            <DropdownMenuItem
-              onClick={() => window.open('https://zensports.vercel.app', '_blank', 'noopener,noreferrer')}
-              className="gap-2 cursor-pointer hover:bg-white/10 focus:bg-white/10"
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> Ver dashboard
-            </DropdownMenuItem>
-          )}
           {canImpersonate && (
             <DropdownMenuItem
               onClick={handleImpersonate}
