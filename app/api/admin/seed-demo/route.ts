@@ -102,7 +102,7 @@ export async function POST() {
           color:             '#E14924',
           subtitulo:         'Formando campeones desde 2019',
           codigo_pais:       '57',
-          plan:              'total',
+          plan:              'scale',
           trial_ends_at:     trialEnds.toISOString(),
           whatsapp_number:   '573009999999',
           modulos: {

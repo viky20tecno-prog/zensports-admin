@@ -33,8 +33,9 @@ export function formatRelative(dateStr: string): string {
 }
 
 export const PLAN_PRICE: Record<string, number> = {
-  trial: 0,
-  starter: 59000,
-  pro: 99000,
-  total: 149000,
+  trial:   0,
+  starter: 149000,
+  pro:     399000,
+  scale:   799000,
+  total:   799000, // legacy alias for scale
 };

@@ -29,6 +29,7 @@ export const PLAN_MODULES: Record<ClubPlan, ModuleKey[]> = {
   trial:   ['jugadores'],
   starter: ['jugadores', 'uniformes', 'cobro'],
   pro:     ['jugadores', 'uniformes', 'cobro', 'torneos', 'arbitraje', 'whatsapp'],
+  scale:   ['jugadores', 'uniformes', 'cobro', 'torneos', 'arbitraje', 'whatsapp', 'conciliacion', 'finanzas'],
   total:   ['jugadores', 'uniformes', 'cobro', 'torneos', 'arbitraje', 'whatsapp', 'conciliacion', 'finanzas'],
 };
 

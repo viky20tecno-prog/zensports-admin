@@ -48,11 +48,12 @@ export function ClubsTable({ initialClubs, role }: Props) {
     setLoading(true);
     const params = new URLSearchParams();
     if (statusFilter) params.set('status', statusFilter);
+    if (globalFilter) params.set('search', globalFilter);
     const res = await fetch(`/api/clubs?${params}`);
     const json = await res.json();
     setClubs(json.clubs || []);
     setLoading(false);
-  }, [statusFilter]);
+  }, [statusFilter, globalFilter]);
 
   const canChangePlan   = canAccess(role, 'change_plan');
   const canSuspend      = canAccess(role, 'suspend_club');

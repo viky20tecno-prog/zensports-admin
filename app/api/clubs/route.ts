@@ -14,20 +14,22 @@ export async function GET(request: Request) {
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  let query = adminDb.from('clubs').select('*', { count: 'exact' });
-  if (search) query = query.or(`name.ilike.%${search}%,slug.ilike.%${search}%`);
+  // Fetch all matching clubs without pagination first so status filter is accurate
+  let query = adminDb.from('clubs').select('*');
+  if (search) {
+    // config->nombre is the club name; slug is always searchable
+    query = query.or(`slug.ilike.%${search}%,config->>nombre.ilike.%${search}%`);
+  }
 
-  const { data: clubs, error, count } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+  const { data: allClubs, error } = await query.order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!clubs?.length) return NextResponse.json({ clubs: [], total: 0 });
+  if (!allClubs?.length) return NextResponse.json({ clubs: [], total: 0 });
 
-  const slugs = clubs.map(c => c.slug);
-  const ids   = clubs.map(c => c.id);
+  const ids = allClubs.map(c => c.id);
+  const slugs = allClubs.map(c => c.slug);
   const idToSlug: Record<string, string> = {};
-  clubs.forEach(c => { idToSlug[c.id] = c.slug; });
+  allClubs.forEach(c => { idToSlug[c.id] = c.slug; });
 
   const [{ data: playerRows }, { data: activityRows }] = await Promise.all([
     adminDb.from('players').select('club_id').in('club_id', ids),
@@ -45,7 +47,7 @@ export async function GET(request: Request) {
   });
   const recentSet = new Set((activityRows || []).map(a => a.entity_id));
 
-  const enriched = clubs.map(club => {
+  const enriched = allClubs.map(club => {
     const player_count = playerCount[club.slug] || 0;
     const has_recent_activity = recentSet.has(club.slug);
     const { score, label } = computeHealthScore({ club, player_count, has_recent_activity });
@@ -60,7 +62,12 @@ export async function GET(request: Request) {
     };
   });
 
+  // Apply status filter after enrichment (status is computed, not a DB column)
   const filtered = statusFilter ? enriched.filter(c => c.status === statusFilter) : enriched;
 
-  return NextResponse.json({ clubs: filtered, total: count });
+  // Paginate after all filters are applied
+  const total = filtered.length;
+  const clubs = filtered.slice(offset, offset + limit);
+
+  return NextResponse.json({ clubs, total });
 }

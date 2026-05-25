@@ -25,7 +25,8 @@ const ONBOARDING_STEPS = [
 const PLAN_UPGRADE_LABEL: Record<string, string> = {
   trial:   'Starter+',
   starter: 'Pro+',
-  pro:     'Total',
+  pro:     'Scale',
+  scale:   '',
   total:   '',
 };
 

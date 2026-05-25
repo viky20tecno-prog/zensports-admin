@@ -12,6 +12,7 @@ const PLAN_COLORS: Record<string, string> = {
   trial:   '#6B7280',
   starter: '#3B82F6',
   pro:     '#8B5CF6',
+  scale:   '#10B981',
   total:   '#10B981',
 };
 
