@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { LogOut, Bell, Menu } from 'lucide-react';
+import { LogOut, Bell, Menu, Sparkles } from 'lucide-react';
 import type { AdminRole } from '@/types/admin';
 
 const ROLE_LABELS: Record<AdminRole, string> = {
@@ -11,12 +11,12 @@ const ROLE_LABELS: Record<AdminRole, string> = {
   ops: 'Operaciones',
 };
 
-const ROLE_COLORS: Record<AdminRole, string> = {
-  super_admin: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25',
-  comercial: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
-  soporte: 'bg-blue-500/15 text-blue-300 border-blue-500/25',
-  finanzas: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
-  ops: 'bg-purple-500/15 text-purple-300 border-purple-500/25',
+const ROLE_STYLES: Record<AdminRole, { bg: string; text: string; glow: string }> = {
+  super_admin: { bg: 'rgba(99,102,241,0.12)',  text: '#a5b4fc', glow: 'rgba(99,102,241,0.3)'  },
+  comercial:   { bg: 'rgba(16,185,129,0.12)',  text: '#6ee7b7', glow: 'rgba(16,185,129,0.3)'  },
+  soporte:     { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', glow: 'rgba(59,130,246,0.3)'  },
+  finanzas:    { bg: 'rgba(245,158,11,0.12)',  text: '#fcd34d', glow: 'rgba(245,158,11,0.3)'  },
+  ops:         { bg: 'rgba(139,92,246,0.12)',  text: '#c4b5fd', glow: 'rgba(139,92,246,0.3)'  },
 };
 
 interface TopbarProps {
@@ -27,6 +27,7 @@ interface TopbarProps {
 
 export function Topbar({ title, role, onMenuClick }: TopbarProps) {
   const router = useRouter();
+  const rs = ROLE_STYLES[role];
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -34,34 +35,58 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
   }
 
   return (
-    <header className="h-14 border-b border-white/5 bg-[#080B12]/80 backdrop-blur-sm flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-30">
-      {/* Hamburger — solo móvil */}
-      <button
-        onClick={onMenuClick}
-        className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition"
-      >
+    <header className="h-14 flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-30"
+      style={{
+        background: 'rgba(7,9,15,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 1px 0 rgba(99,102,241,0.08)',
+      }}>
+
+      {/* Hamburger móvil */}
+      <button onClick={onMenuClick}
+        className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition rounded-lg hover:bg-white/5">
         <Menu className="w-5 h-5" />
       </button>
-      <h1 className="text-sm font-semibold text-white flex-1 tracking-tight">{title}</h1>
 
-      <div className="flex items-center gap-3">
+      {/* Title */}
+      <div className="flex items-center gap-2 flex-1">
+        <Sparkles className="w-3.5 h-3.5 text-indigo-400/60 hidden sm:block" />
+        <h1 className="text-sm font-semibold tracking-tight"
+          style={{ background: 'linear-gradient(90deg, #e2e8f0, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          {title}
+        </h1>
+      </div>
+
+      <div className="flex items-center gap-2">
         {/* Role badge */}
-        <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${ROLE_COLORS[role]}`}>
+        <span className="hidden sm:inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-full border tracking-wide"
+          style={{
+            background: rs.bg,
+            color: rs.text,
+            borderColor: rs.glow,
+            boxShadow: `0 0 12px ${rs.glow}`,
+          }}>
           {ROLE_LABELS[role]}
         </span>
 
-        {/* Notifications placeholder */}
-        <button className="w-8 h-8 rounded-lg border border-white/8 bg-white/3 flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-white/8 transition">
+        {/* Notifications */}
+        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-200 transition relative group"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <Bell className="w-4 h-4" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-400 ring-1 ring-[#07090F]" />
         </button>
 
+        {/* Divider */}
+        <div className="w-px h-5 bg-white/8 mx-1" />
+
         {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-8 h-8 rounded-lg border border-white/8 bg-white/3 flex items-center justify-center text-gray-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition"
-          title="Cerrar sesión"
-        >
-          <LogOut className="w-4 h-4" />
+        <button onClick={handleLogout}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-red-400 transition group"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+          title="Cerrar sesión">
+          <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
         </button>
       </div>
     </header>

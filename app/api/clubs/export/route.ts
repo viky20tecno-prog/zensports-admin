@@ -4,10 +4,12 @@ import { adminDb } from '@/lib/supabase-admin';
 import { PLAN_PRICE } from '@/lib/utils';
 import { getClubStatus, getTrialDaysLeft } from '@/lib/health-score';
 
+const SEP = ';';
+
 function escape(val: string | number | null | undefined): string {
   if (val == null) return '';
   const s = String(val);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+  if (s.includes(SEP) || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }
 
@@ -55,10 +57,11 @@ export async function GET() {
       escape(club.owner_user_id),
       escape(club.config?.onboarding_completed ? 'Sí' : 'No'),
       escape(club.created_at?.slice(0, 10)),
-    ].join(',');
+    ].join(SEP);
   });
 
-  const csv = [headers.join(','), ...rows].join('\n');
+  const BOM = '﻿';
+  const csv = BOM + [headers.join(SEP), ...rows].join('\n');
   const date = new Date().toISOString().slice(0, 10);
 
   return new NextResponse(csv, {

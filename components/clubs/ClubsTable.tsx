@@ -5,7 +5,7 @@ import {
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
 import Link from 'next/link';
-import { Search, ArrowUpDown, Users, Activity, Info, Download, Mail, X, Plus } from 'lucide-react';
+import { Search, ArrowUpDown, Users, Activity, Info, Download, Mail, X, Plus, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ClubStatusBadge } from './ClubStatusBadge';
@@ -87,6 +87,38 @@ export function ClubsTable({ initialClubs, role }: Props) {
 
   function handleExport() {
     window.open('/api/clubs/export', '_blank');
+  }
+
+  function handlePDF() {
+    const rows = clubs.map(c => `
+      <tr>
+        <td>${c.config?.nombre || c.slug}</td>
+        <td>${c.config?.ciudad || '—'}</td>
+        <td style="text-transform:capitalize">${c.config?.plan || 'trial'}</td>
+        <td>${c.status}</td>
+        <td>${c.player_count}</td>
+        <td>${c.created_at?.slice(0,10)}</td>
+      </tr>`).join('');
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html><head><title>ZenSports — Clubes</title>
+    <style>
+      body { font-family: 'Segoe UI', sans-serif; padding: 32px; color: #111; }
+      h1 { font-size: 20px; margin: 0 0 4px; } p { color: #666; font-size: 13px; margin: 0 0 20px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { background: #1e1b4b; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+      td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; }
+      tr:nth-child(even) td { background: #f9fafb; }
+      @media print { body { padding: 0; } }
+    </style></head><body>
+    <h1>ZenSports — Reporte de Clubes</h1>
+    <p>Generado el ${new Date().toLocaleDateString('es-CO')} · ${clubs.length} clubes</p>
+    <table><thead><tr>
+      <th>Club</th><th>Ciudad</th><th>Plan</th><th>Estado</th><th>Jugadores</th><th>Creado</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+    win.document.close();
   }
 
   const columns: ColumnDef<ClubWithMetrics>[] = [
@@ -312,7 +344,11 @@ export function ClubsTable({ initialClubs, role }: Props) {
         <div className="ml-auto flex items-center gap-2">
           <button onClick={handleExport}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
-            <Download className="w-3.5 h-3.5" /> Exportar CSV
+            <Download className="w-3.5 h-3.5" /> CSV
+          </button>
+          <button onClick={handlePDF}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+            <FileText className="w-3.5 h-3.5" /> PDF
           </button>
           <button onClick={() => setCreateOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600/20 text-xs text-indigo-300 hover:text-white hover:bg-indigo-600/40 transition-colors font-medium">
