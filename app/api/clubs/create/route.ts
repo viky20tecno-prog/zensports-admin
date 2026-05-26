@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Error creando el club: ' + clubError.message }, { status: 500 });
   }
 
-  await adminDb.from('club_members').insert({ user_id: userId, club_id: slug }).catch(() => {});
+  await adminDb.from('club_members').insert({ user_id: userId, club_id: slug });
 
   return NextResponse.json({ success: true, slug });
 }

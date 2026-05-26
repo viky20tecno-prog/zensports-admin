@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { MessageCircle, RefreshCw, CheckCircle2, Clock, Search, Users, X, Send } from 'lucide-react';
+import { MessageCircle, RefreshCw, CheckCircle2, Clock, Search, Users, X, Send, Trash2 } from 'lucide-react';
 
 interface Lead {
   id: string;
@@ -32,6 +32,7 @@ export default function LeadsPage() {
   const [search, setSearch]     = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [sendModal, setSendModal] = useState<Lead | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,6 +67,14 @@ export default function LeadsPage() {
     const link = registroLink(lead);
     const msg = `¡Hola ${lead.nombre}! 👋 Fue un placer hablar contigo.\n\nAquí está tu enlace para activar tu prueba gratuita de 5 días en ZenSports 🚀\n\n👉 ${link}\n\nEs rápido, sin tarjeta de crédito. Cualquier duda estoy aquí. ¡Bienvenido al equipo! 🏆`;
     return `https://wa.me/57${lead.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const deleteLead = async (id: string) => {
+    if (!confirm('¿Eliminar este lead?')) return;
+    setDeleting(id);
+    await fetch(`/api/leads?id=${id}`, { method: 'DELETE' });
+    setDeleting(null);
+    load();
   };
 
   const waLink = (wa: string, nombre: string, plan: string) => {
@@ -187,6 +196,12 @@ export default function LeadsPage() {
                         onClick={() => markConverted(lead, !lead.convertido)}
                         className="px-2 py-1.5 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-50">
                         {lead.convertido ? 'Desmarcar' : '✓ Convertido'}
+                      </button>
+                      <button
+                        disabled={deleting === lead.id}
+                        onClick={() => deleteLead(lead.id)}
+                        className="px-2 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-colors disabled:opacity-50">
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>
