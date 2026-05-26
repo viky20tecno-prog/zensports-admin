@@ -37,7 +37,7 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
         <p style="font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 28px;">
           Hola ${nombre_admin}, para continuar gestionando tu club sin interrupciones elige el plan que mejor se adapte a tus necesidades.
         </p>
-        <a href="https://city-fc-dashboard-pi.vercel.app/#precios"
+        <a href="https://zensports.zenpra.ai/#precios"
            style="display:inline-block;background:linear-gradient(135deg,#E14924,#E14924cc);color:#fff;font-weight:700;font-size:15px;text-decoration:none;border-radius:12px;padding:14px 28px;">
           Ver planes y precios →
         </a>

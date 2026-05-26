@@ -27,7 +27,7 @@ export async function POST(
   const { data: linkData, error: linkError } = await adminDb.auth.admin.generateLink({
     type: 'recovery',
     email,
-    options: { redirectTo: 'https://zensports.vercel.app/login' },
+    options: { redirectTo: 'https://zensports.zenpra.ai/login' },
   });
 
   if (linkError || !linkData) {

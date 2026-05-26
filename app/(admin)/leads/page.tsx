@@ -53,7 +53,7 @@ export default function LeadsPage() {
   };
 
   const registroLink = (lead: Lead) => {
-    const base = 'https://zensports.vercel.app/registro';
+    const base = 'https://zensports.zenpra.ai/registro';
     const params = new URLSearchParams({
       nombre: lead.nombre_club || lead.nombre,
       plan:   lead.plan_interes,
