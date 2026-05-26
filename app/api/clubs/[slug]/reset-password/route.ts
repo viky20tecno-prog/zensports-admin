@@ -5,7 +5,7 @@ import { writeAuditLog } from '@/lib/audit';
 import { canAccess } from '@/lib/rbac';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zenpra.ai>';
 
 export async function POST(
   _req: Request,

@@ -61,7 +61,8 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const canSuspend      = canAccess(role, 'suspend_club');
   const canExtendTrial  = canAccess(role, 'extend_trial');
   const canDelete       = canAccess(role, 'delete_club');
-  const canImpersonate  = canAccess(role, 'impersonate');
+  const canImpersonate    = canAccess(role, 'impersonate');
+  const canResetPassword  = canAccess(role, 'reset_password');
 
   function toggleSelect(slug: string) {
     setSelected(prev => { const n = new Set(prev); n.has(slug) ? n.delete(slug) : n.add(slug); return n; });
@@ -291,6 +292,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
           canExtendTrial={canExtendTrial}
           canDelete={canDelete}
           canImpersonate={canImpersonate}
+          canResetPassword={canResetPassword}
           onRefresh={refresh}
         />
       ),
