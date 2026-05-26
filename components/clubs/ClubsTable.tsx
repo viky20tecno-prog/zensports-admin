@@ -5,11 +5,12 @@ import {
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
 import Link from 'next/link';
-import { Search, ArrowUpDown, Users, Activity, Info, Download, Mail, X } from 'lucide-react';
+import { Search, ArrowUpDown, Users, Activity, Info, Download, Mail, X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ClubStatusBadge } from './ClubStatusBadge';
 import { ClubActionsMenu } from './ClubActionsMenu';
+import { CreateClubDialog } from './CreateClubDialog';
 import { formatDate, formatCOP, PLAN_PRICE } from '@/lib/utils';
 import type { ClubWithMetrics } from '@/types/club';
 import type { AdminRole } from '@/types/admin';
@@ -43,6 +44,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkResult, setBulkResult] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -307,10 +309,16 @@ export function ClubsTable({ initialClubs, role }: Props) {
           ))}
         </div>
         {loading && <span className="text-xs text-gray-500 animate-pulse">Actualizando...</span>}
-        <button onClick={handleExport}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
-          <Download className="w-3.5 h-3.5" /> Exportar CSV
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={handleExport}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+            <Download className="w-3.5 h-3.5" /> Exportar CSV
+          </button>
+          <button onClick={() => setCreateOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600/20 text-xs text-indigo-300 hover:text-white hover:bg-indigo-600/40 transition-colors font-medium">
+            <Plus className="w-3.5 h-3.5" /> Crear club
+          </button>
+        </div>
       </div>
 
       {/* Bulk action bar */}
@@ -370,6 +378,12 @@ export function ClubsTable({ initialClubs, role }: Props) {
       </div>
 
       <p className="text-xs text-gray-600">{table.getRowModel().rows.length} clubes mostrados</p>
+
+      <CreateClubDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSuccess={refresh}
+      />
     </div>
   );
 }
