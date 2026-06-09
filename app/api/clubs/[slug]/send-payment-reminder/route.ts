@@ -46,9 +46,9 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
       <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:28px;margin-bottom:24px;">
         <p style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 16px;">Planes disponibles</p>
         ${[
-          { plan: 'Starter', precio: '$59.000 COP/mes', desc: 'Jugadores + Cobro WA + Uniformes' },
-          { plan: 'Pro',     precio: '$99.000 COP/mes', desc: 'Todo Starter + Torneos + Arbitraje' },
-          { plan: 'Total',   precio: '$149.000 COP/mes', desc: 'Todo incluido + Finanzas + Conciliación' },
+          { plan: 'Starter', precio: '$149.000 COP/mes', desc: 'Dashboard + Cobro WA + Carnet digital' },
+          { plan: 'Pro',     precio: '$399.000 COP/mes', desc: 'Todo Starter + Torneos + Arbitraje + Finanzas' },
+          { plan: 'Scale',   precio: '$799.000 COP/mes', desc: 'Todo incluido + múltiples admins + soporte prioritario' },
         ].map(p => `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
           <div>
