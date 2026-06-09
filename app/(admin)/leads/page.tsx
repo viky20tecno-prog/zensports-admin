@@ -55,12 +55,15 @@ export default function LeadsPage() {
 
   const registroLink = (lead: Lead) => {
     const base = 'https://zensports.zenpra.ai/registro';
-    const params = new URLSearchParams({
+    const raw: Record<string, string> = {
       nombre: lead.nombre_club || lead.nombre,
-      plan:   lead.plan_interes,
+      admin:  lead.nombre,
       wa:     lead.whatsapp,
-    });
-    return `${base}?${params.toString()}`;
+      plan:   lead.plan_interes,
+    };
+    if (lead.email)  raw.email  = lead.email;
+    if (lead.ciudad) raw.ciudad = lead.ciudad;
+    return `${base}?${new URLSearchParams(raw).toString()}`;
   };
 
   const waRegistro = (lead: Lead) => {
