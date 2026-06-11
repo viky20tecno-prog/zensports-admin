@@ -1,21 +1,23 @@
 import 'server-only';
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.zoho.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.ZOHO_SMTP_USER,
-    pass: process.env.ZOHO_SMTP_PASS,
-  },
-});
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: 'smtp.zoho.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.ZOHO_SMTP_USER,
+      pass: process.env.ZOHO_SMTP_PASS,
+    },
+  });
+}
 
-const FROM = process.env.EMAIL_FROM || `ZenSports <${process.env.ZOHO_SMTP_USER}>`;
+const FROM = () => process.env.EMAIL_FROM || `ZenSports <${process.env.ZOHO_SMTP_USER}>`;
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
-  await transporter.sendMail({
-    from: FROM,
+  await getTransporter().sendMail({
+    from: FROM(),
     to: email,
     subject: 'Restablecer contraseña — ZenSports Admin',
     html: `
