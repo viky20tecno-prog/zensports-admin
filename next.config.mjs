@@ -27,6 +27,7 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  serverExternalPackages: ['nodemailer'],
   async headers() {
     return [
       {
