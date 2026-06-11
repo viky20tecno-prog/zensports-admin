@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Lock } from 'lucide-react';
+import { CheckCircle2, XCircle, Lock, Pencil } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { formatCOP, formatDate, formatRelative, PLAN_PRICE } from '@/lib/utils';
 import { MODULE_KEYS, MODULE_LABELS, isModuleUnlocked } from '@/lib/plan-modules';
+import { EditAdminContactDialog } from '@/components/clubs/EditAdminContactDialog';
 import type { ClubFullDetail } from '@/types/club';
 import type { ModuleKey } from '@/lib/plan-modules';
 
@@ -39,6 +40,9 @@ export function OverviewTab({ detail }: Props) {
 
   const [modulos, setModulos] = useState<Record<string, boolean>>((cfg.modulos ?? {}) as Record<string, boolean>);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [editContact, setEditContact] = useState(false);
+  const [ownerEmail,  setOwnerEmail]  = useState(detail.owner_email ?? '');
+  const [celularAdmin, setCelularAdmin] = useState(detail.celular_admin ?? '');
 
   async function toggleModule(key: ModuleKey, next: boolean) {
     setToggling(key);
@@ -59,15 +63,26 @@ export function OverviewTab({ detail }: Props) {
 
       {/* Config */}
       <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Configuración</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Configuración</h3>
+          <button
+            onClick={() => setEditContact(true)}
+            className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition"
+          >
+            <Pencil className="w-3 h-3" /> Cambiar admin
+          </button>
+        </div>
         <dl className="space-y-2 text-sm">
           <Row label="Plan" value={
             <span className="capitalize">
               {plan} {price > 0 && <span className="text-gray-600 text-xs ml-1">{formatCOP(price)}/mes</span>}
             </span>
           } />
-          {detail.owner_email && (
-            <Row label="Email admin" value={<span className="font-mono text-xs">{detail.owner_email}</span>} />
+          {ownerEmail && (
+            <Row label="Email admin" value={<span className="font-mono text-xs">{ownerEmail}</span>} />
+          )}
+          {celularAdmin && (
+            <Row label="WA admin (bot)" value={celularAdmin} />
           )}
           <Row label="Ciudad"         value={cfg.ciudad || '—'} />
           <Row label="WhatsApp"       value={cfg.whatsapp || '—'} />
@@ -80,6 +95,17 @@ export function OverviewTab({ detail }: Props) {
           <Row label="Creado" value={formatDate(detail.created_at)} />
         </dl>
       </section>
+
+      {editContact && (
+        <EditAdminContactDialog
+          slug={detail.slug}
+          currentEmail={ownerEmail}
+          currentCelular={celularAdmin}
+          open={editContact}
+          onClose={() => setEditContact(false)}
+          onSuccess={(email, celular) => { setOwnerEmail(email); setCelularAdmin(celular); }}
+        />
+      )}
 
       {/* Módulos */}
       <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
