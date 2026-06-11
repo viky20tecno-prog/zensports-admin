@@ -2,18 +2,20 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Loader2, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Loader2, ShieldCheck, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 function ResetForm() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const token        = searchParams.get('token') ?? '';
 
-  const [password, setPassword]   = useState('');
-  const [confirm, setConfirm]     = useState('');
-  const [error, setError]         = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [success, setSuccess]     = useState(false);
+  const [password, setPassword]     = useState('');
+  const [confirm, setConfirm]       = useState('');
+  const [error, setError]           = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [success, setSuccess]       = useState(false);
+  const [showPass, setShowPass]     = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,25 +54,43 @@ function ResetForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Nueva contraseña</label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          placeholder="Mínimo 8 caracteres"
-          className="w-full bg-[#111827] border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
-        />
+        <div className="relative">
+          <input
+            type={showPass ? 'text' : 'password'}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            placeholder="Mínimo 8 caracteres"
+            className="w-full bg-[#111827] border border-white/8 rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPass(v => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+          >
+            {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Confirmar contraseña</label>
-        <input
-          type="password"
-          value={confirm}
-          onChange={e => setConfirm(e.target.value)}
-          required
-          placeholder="••••••••"
-          className="w-full bg-[#111827] border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
-        />
+        <div className="relative">
+          <input
+            type={showConfirm ? 'text' : 'password'}
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            required
+            placeholder="••••••••"
+            className="w-full bg-[#111827] border border-white/8 rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirm(v => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+          >
+            {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
       {error && (
         <motion.p
