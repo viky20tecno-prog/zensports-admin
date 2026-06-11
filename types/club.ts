@@ -44,6 +44,7 @@ export interface Club {
   owner_user_id: string;
   created_at: string;
   config: ClubConfig;
+  celular_admin?: string;
 }
 
 export interface ClubWithMetrics extends Club {
