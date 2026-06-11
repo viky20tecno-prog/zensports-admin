@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { adminDb } from '@/lib/supabase-admin';
-import { sendPasswordResetEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,12 +28,25 @@ export async function POST(req: NextRequest) {
 
     const baseUrl  = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://zensports-admin.vercel.app';
     const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+    const apiUrl   = process.env.API_URL || 'https://city-fc-api-v2.vercel.app';
+    const secret   = process.env.INTERNAL_API_SECRET;
 
-    await sendPasswordResetEmail(admin.email, resetUrl);
+    const res = await fetch(`${apiUrl}/api/internal/send-reset-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': secret ?? '',
+      },
+      body: JSON.stringify({ to: admin.email, resetUrl }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[forgot-password] API email error:', err);
+    }
   } catch (err) {
     console.error('[forgot-password] error:', err);
   }
 
-  // Siempre responder ok — no revelar si el email existe o si hubo error
   return NextResponse.json({ ok: true });
 }
