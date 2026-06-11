@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
@@ -75,7 +76,12 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Contraseña</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Contraseña</label>
+                <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <input
                 type="password"
                 value={password}

@@ -103,17 +103,19 @@ export function Sidebar({ role, name, onClose }: SidebarProps) {
 
       {/* User */}
       <div className="relative px-4 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/3 border border-white/6">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 12px rgba(99,102,241,0.3)' }}>
-            {initials}
+        <Link href="/settings/profile">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/3 border border-white/6 hover:bg-white/6 transition cursor-pointer">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 12px rgba(99,102,241,0.3)' }}>
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-white truncate">{name}</div>
+              <div className="text-[10px] text-gray-500 capitalize">{role.replace('_', ' ')}</div>
+            </div>
+            <ShieldCheck className="w-3.5 h-3.5 text-indigo-400/60 shrink-0" />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold text-white truncate">{name}</div>
-            <div className="text-[10px] text-gray-500 capitalize">{role.replace('_', ' ')}</div>
-          </div>
-          <ShieldCheck className="w-3.5 h-3.5 text-indigo-400/60 shrink-0" />
-        </div>
+        </Link>
       </div>
     </aside>
   );
