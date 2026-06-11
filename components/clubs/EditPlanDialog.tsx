@@ -7,9 +7,9 @@ import type { ClubWithMetrics } from '@/types/club';
 
 const PLANS = [
   { value: 'trial',   label: 'Trial (gratis)' },
-  { value: 'starter', label: 'Starter — $59.000/mes' },
-  { value: 'pro',     label: 'Pro — $99.000/mes' },
-  { value: 'scale',   label: 'Scale — $149.000/mes' },
+  { value: 'starter', label: 'Starter — $149.000/mes' },
+  { value: 'pro',     label: 'Pro — $399.000/mes' },
+  { value: 'scale',   label: 'Scale — $799.000/mes' },
 ];
 
 interface Props {
