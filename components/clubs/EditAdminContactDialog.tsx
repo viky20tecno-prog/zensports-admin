@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, UserCog } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 interface Props {
   slug:          string;
@@ -71,13 +72,10 @@ export function EditAdminContactDialog({ slug, currentEmail, currentCelular, ope
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">WhatsApp admin (bot)</label>
-            <input
-              type="tel"
+            <PhoneInput
               value={celular}
-              onChange={e => setCelular(e.target.value.replace(/\D/g, ''))}
+              onChange={setCelular}
               placeholder="3001234567"
-              maxLength={12}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
             />
             <p className="text-[10px] text-gray-600">Número que el bot Zen reconoce como administrador</p>
           </div>
