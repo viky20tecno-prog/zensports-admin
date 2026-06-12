@@ -149,7 +149,7 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
         >
           <MoreHorizontal className="w-4 h-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-64">
+        <DropdownMenuContent align="end" className="bg-[#0F1219] border-white/10 text-gray-200 w-64 z-50">
           {canImpersonate && (
             <DropdownMenuItem onClick={handleImpersonate} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
               <UserCheck className="w-3.5 h-3.5 mt-0.5 shrink-0" />

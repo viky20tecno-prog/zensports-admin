@@ -380,7 +380,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
 
 
       {/* Table */}
-      <div className="rounded-xl border border-white/8 overflow-hidden">
+      <div className="rounded-xl border border-white/8 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-white/3 border-b border-white/8">
             {table.getHeaderGroups().map(hg => (
