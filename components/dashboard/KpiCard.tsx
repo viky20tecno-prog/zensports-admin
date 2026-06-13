@@ -11,9 +11,10 @@ interface KpiCardProps {
   prefix?: string;
   suffix?: string;
   animate?: boolean;
+  trend?: number | null; // % cambio vs período anterior, null = sin datos
 }
 
-export function KpiCard({ label, value, sub, color = 'indigo', prefix, suffix, animate: doAnimate = true }: KpiCardProps) {
+export function KpiCard({ label, value, sub, color = 'indigo', prefix, suffix, animate: doAnimate = true, trend }: KpiCardProps) {
   const glowMap = {
     indigo: 'glow-blue',
     green:  'glow-green',
@@ -61,7 +62,14 @@ export function KpiCard({ label, value, sub, color = 'indigo', prefix, suffix, a
         {suffix}
       </div>
 
-      {sub && <p className="text-xs text-gray-600">{sub}</p>}
+      <div className="flex items-center gap-2">
+        {sub && <p className="text-xs text-gray-600 flex-1">{sub}</p>}
+        {trend !== undefined && trend !== null && (
+          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md ${trend >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}>
+            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
+          </span>
+        )}
+      </div>
     </motion.div>
   );
 }
