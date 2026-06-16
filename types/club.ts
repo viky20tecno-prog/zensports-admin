@@ -31,6 +31,8 @@ export interface ClubConfig {
   penalidad_mora?: number;
   categorias_jugadores?: string[];
   redes_sociales?: Record<string, string>;
+  deporte?: string;
+  deportes?: string[];
 }
 
 export interface Club {
