@@ -86,7 +86,7 @@ export async function POST() {
 
     // 3. Crear el club demo
     const now = new Date();
-    const trialEnds = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const trialEnds = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
     const { data: club, error: clubErr } = await adminDb
       .from('clubs')
       .insert({

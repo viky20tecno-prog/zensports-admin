@@ -15,47 +15,48 @@
   .glow-yellow { box-shadow: 0 0 20px rgba(245,158,11,0.15); }
   .glow-red    { box-shadow: 0 0 20px rgba(239,68,68,0.15); }
   .glow-blue   { box-shadow: 0 0 20px rgba(99,102,241,0.15); }
+  .glow-violet { box-shadow: 0 0 20px rgba(106,0,255,0.20); }
 }
 
 @layer base {
   /* ZenSports Admin — Dark enterprise theme */
   :root {
-    --background:          #080B12;
-    --foreground:          #F0F4FF;
-    --card:                #0E1219;
-    --card-foreground:     #F0F4FF;
-    --popover:             #131820;
-    --popover-foreground:  #F0F4FF;
-    --primary:             #6366F1;
+    --background:          #0B0D1A;
+    --foreground:          #EFFFFF;
+    --card:                #12152A;
+    --card-foreground:     #EFFFFF;
+    --popover:             #1A1F29;
+    --popover-foreground:  #EFFFFF;
+    --primary:             #6A00FF;
     --primary-foreground:  #FFFFFF;
-    --secondary:           #1A2030;
-    --secondary-foreground:#9CA3AF;
-    --muted:               #1A2030;
+    --secondary:           #1A1F29;
+    --secondary-foreground:#AE68FF;
+    --muted:               #1A1F29;
     --muted-foreground:    #6B7280;
-    --accent:              #1E2740;
-    --accent-foreground:   #F0F4FF;
+    --accent:              #1E1640;
+    --accent-foreground:   #EFFFFF;
     --destructive:         #EF4444;
     --border:              rgba(255,255,255,0.07);
-    --input:               #111827;
-    --ring:                #6366F1;
+    --input:               #12152A;
+    --ring:                #6A00FF;
     --radius:              0.75rem;
 
     /* Charts */
-    --chart-1: #6366F1;
+    --chart-1: #6A00FF;
     --chart-2: #22C55E;
     --chart-3: #F59E0B;
     --chart-4: #EF4444;
-    --chart-5: #8B5CF6;
+    --chart-5: #AE68FF;
 
     /* Sidebar */
-    --sidebar:                    #0A0D14;
-    --sidebar-foreground:         #F0F4FF;
-    --sidebar-primary:            #6366F1;
+    --sidebar:                    #0B0D1A;
+    --sidebar-foreground:         #EFFFFF;
+    --sidebar-primary:            #6A00FF;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent:             #1A2030;
-    --sidebar-accent-foreground:  #F0F4FF;
+    --sidebar-accent:             #1A1F29;
+    --sidebar-accent-foreground:  #EFFFFF;
     --sidebar-border:             rgba(255,255,255,0.05);
-    --sidebar-ring:               #6366F1;
+    --sidebar-ring:               #6A00FF;
   }
 
   * {
