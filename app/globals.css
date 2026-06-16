@@ -69,7 +69,9 @@
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  html { font-family: var(--font-sans, sans-serif); }
+  --font-display: 'Clash Display', 'Space Grotesk', sans-serif;
+  --font-body:    var(--font-sans, 'Space Grotesk', sans-serif);
+  html { font-family: var(--font-body); }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }

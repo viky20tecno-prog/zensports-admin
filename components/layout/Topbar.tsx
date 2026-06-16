@@ -12,11 +12,11 @@ const ROLE_LABELS: Record<AdminRole, string> = {
 };
 
 const ROLE_STYLES: Record<AdminRole, { bg: string; text: string; glow: string }> = {
-  super_admin: { bg: 'rgba(99,102,241,0.12)',  text: '#a5b4fc', glow: 'rgba(99,102,241,0.3)'  },
-  comercial:   { bg: 'rgba(16,185,129,0.12)',  text: '#6ee7b7', glow: 'rgba(16,185,129,0.3)'  },
-  soporte:     { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', glow: 'rgba(59,130,246,0.3)'  },
-  finanzas:    { bg: 'rgba(245,158,11,0.12)',  text: '#fcd34d', glow: 'rgba(245,158,11,0.3)'  },
-  ops:         { bg: 'rgba(139,92,246,0.12)',  text: '#c4b5fd', glow: 'rgba(139,92,246,0.3)'  },
+  super_admin: { bg: 'rgba(106,0,255,0.14)',   text: '#AE68FF', glow: 'rgba(106,0,255,0.35)' },
+  comercial:   { bg: 'rgba(16,185,129,0.12)',  text: '#6ee7b7', glow: 'rgba(16,185,129,0.3)' },
+  soporte:     { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', glow: 'rgba(59,130,246,0.3)' },
+  finanzas:    { bg: 'rgba(245,158,11,0.12)',  text: '#fcd34d', glow: 'rgba(245,158,11,0.3)' },
+  ops:         { bg: 'rgba(106,0,255,0.10)',   text: '#C084FF', glow: 'rgba(106,0,255,0.25)' },
 };
 
 interface TopbarProps {
@@ -41,7 +41,7 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-        boxShadow: '0 1px 0 rgba(99,102,241,0.08)',
+        boxShadow: '0 1px 0 rgba(106,0,255,0.10)',
       }}>
 
       {/* Hamburger móvil */}
@@ -52,9 +52,9 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
 
       {/* Title */}
       <div className="flex items-center gap-2 flex-1">
-        <Sparkles className="w-3.5 h-3.5 text-indigo-400/60 hidden sm:block" />
+        <Sparkles className="w-3.5 h-3.5 hidden sm:block" style={{ color: 'rgba(174,104,255,0.6)' }} />
         <h1 className="text-sm font-semibold tracking-tight"
-          style={{ background: 'linear-gradient(90deg, #e2e8f0, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          style={{ fontFamily: "'Clash Display','Space Grotesk',sans-serif", background: 'linear-gradient(90deg, #EFFFFF, #AE68FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {title}
         </h1>
       </div>
@@ -75,7 +75,7 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
         <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-200 transition relative group"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-400 ring-1 ring-[#07090F]" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ring-1 ring-[#07090F]" style={{ background: '#6A00FF' }} />
         </button>
 
         {/* Divider */}

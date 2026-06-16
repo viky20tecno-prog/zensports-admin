@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Building2, BarChart3, ScrollText,
-  Settings, ShieldCheck, UserPlus, X, Zap,
+  Settings, ShieldCheck, UserPlus, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminRole } from '@/types/admin';
@@ -48,7 +48,7 @@ export function Sidebar({ role, name, onClose }: SidebarProps) {
 
       {/* Glow top */}
       <div className="absolute top-0 left-0 w-full h-32 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(106,0,255,0.18) 0%, transparent 70%)' }} />
 
       {/* Brand */}
       <div className="relative px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -58,14 +58,17 @@ export function Sidebar({ role, name, onClose }: SidebarProps) {
           </button>
         )}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center relative"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', boxShadow: '0 0 20px rgba(99,102,241,0.4)' }}>
-            <Zap className="w-4 h-4 text-white" />
+          {/* Logo Z isotipo */}
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden shrink-0"
+            style={{ background: 'linear-gradient(135deg, #6A00FF 0%, #AE68FF 100%)', boxShadow: '0 0 20px rgba(106,0,255,0.45)' }}>
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+              <path d="M5 7H19L5 17H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
           <div>
-            <div className="text-sm font-bold leading-none"
-              style={{ background: 'linear-gradient(90deg, #a5b4fc, #c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              ZenSports
+            <div className="text-sm font-semibold leading-none tracking-tight"
+              style={{ fontFamily: "'Clash Display','Space Grotesk',sans-serif", background: 'linear-gradient(90deg, #AE68FF, #C084FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ fontWeight: 400 }}>ZEN</span>SPORTS
             </div>
             <div className="text-[10px] text-gray-600 mt-0.5 font-medium tracking-wide uppercase">Admin Console</div>
           </div>
@@ -106,14 +109,14 @@ export function Sidebar({ role, name, onClose }: SidebarProps) {
         <Link href="/settings/profile">
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/3 border border-white/6 hover:bg-white/6 transition cursor-pointer">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 12px rgba(99,102,241,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #6A00FF, #AE68FF)', boxShadow: '0 0 12px rgba(106,0,255,0.35)' }}>
               {initials}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold text-white truncate">{name}</div>
               <div className="text-[10px] text-gray-500 capitalize">{role.replace('_', ' ')}</div>
             </div>
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-400/60 shrink-0" />
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" style={{ color: 'rgba(174,104,255,0.6)' }} />
           </div>
         </Link>
       </div>
