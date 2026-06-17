@@ -31,4 +31,5 @@ export type Permission =
   | 'view_analytics'
   | 'impersonate'
   | 'delete_club'
-  | 'reset_password';
+  | 'reset_password'
+  | 'edit_club';

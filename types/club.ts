@@ -33,6 +33,7 @@ export interface ClubConfig {
   redes_sociales?: Record<string, string>;
   deporte?: string;
   deportes?: string[];
+  celulares_staff?: string[];
 }
 
 export interface Club {

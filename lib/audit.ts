@@ -18,7 +18,9 @@ export type AuditAction =
   | 'UPDATE_ADMIN_CONTACT'
   | 'CLUB_DELETED'
   | 'BILLING_RECORDED'
-  | 'IMPERSONATE';
+  | 'IMPERSONATE'
+  | 'STAFF_ADDED'
+  | 'STAFF_REMOVED';
 
 interface WriteAuditLogParams {
   admin_id?: string;

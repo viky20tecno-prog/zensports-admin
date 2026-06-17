@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Lock, Pencil } from 'lucide-react';
+import { CheckCircle2, XCircle, Lock, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { formatCOP, formatDate, formatRelative, PLAN_PRICE } from '@/lib/utils';
 import { MODULE_KEYS, MODULE_LABELS, isModuleUnlocked } from '@/lib/plan-modules';
@@ -43,6 +43,24 @@ export function OverviewTab({ detail }: Props) {
   const [editContact, setEditContact] = useState(false);
   const [ownerEmail,  setOwnerEmail]  = useState(detail.owner_email ?? '');
   const [celularAdmin, setCelularAdmin] = useState(detail.celular_admin ?? '');
+  const [staff, setStaff] = useState<string[]>(cfg.celulares_staff ?? []);
+  const [newStaff, setNewStaff] = useState('');
+  const [staffLoading, setStaffLoading] = useState(false);
+
+  async function staffAction(action: 'add' | 'remove', celular: string) {
+    setStaffLoading(true);
+    const res = await fetch(`/api/clubs/${detail.slug}/staff`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, celular }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setStaff(data.celulares_staff);
+      if (action === 'add') setNewStaff('');
+    }
+    setStaffLoading(false);
+  }
 
   async function toggleModule(key: ModuleKey, next: boolean) {
     setToggling(key);
@@ -220,6 +238,53 @@ export function OverviewTab({ detail }: Props) {
             );
           })}
         </ul>
+      </section>
+
+      {/* Staff WhatsApp */}
+      <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3 md:col-span-2">
+        <div className="flex items-center gap-2">
+          <Users className="w-3.5 h-3.5 text-gray-500" />
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Staff WhatsApp (bot)</h3>
+          <span className="text-xs text-gray-700 ml-1">— entrenadores y asistentes con acceso al bot</span>
+        </div>
+
+        {/* Lista actual */}
+        {staff.length === 0 ? (
+          <p className="text-sm text-gray-600">Sin staff registrado aún.</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {staff.map(n => (
+              <li key={n} className="flex items-center gap-1.5 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+                <span className="font-mono text-gray-300">{n}</span>
+                <button
+                  onClick={() => staffAction('remove', n)}
+                  disabled={staffLoading}
+                  className="text-gray-600 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Agregar */}
+        <div className="flex gap-2 mt-1">
+          <input
+            type="tel"
+            value={newStaff}
+            onChange={e => setNewStaff(e.target.value)}
+            placeholder="Número celular (ej: 3001234567)"
+            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            onClick={() => newStaff.trim() && staffAction('add', newStaff.trim())}
+            disabled={staffLoading || !newStaff.trim()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 transition text-white"
+          >
+            <Plus className="w-3.5 h-3.5" /> Agregar
+          </button>
+        </div>
       </section>
 
     </div>
