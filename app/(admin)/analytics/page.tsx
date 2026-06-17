@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getAdminSession } from '@/lib/auth';
 import { canAccess } from '@/lib/rbac';
-import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
+import { AnalyticsTabs } from '@/components/analytics/AnalyticsTabs';
 
 export default async function AnalyticsPage() {
   const session = await getAdminSession();
@@ -12,9 +12,9 @@ export default async function AnalyticsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white tracking-tight">Analytics</h2>
-        <p className="text-sm text-gray-500 mt-1">Métricas del negocio en tiempo real</p>
+        <p className="text-sm text-gray-500 mt-1">Métricas del negocio y del bot WhatsApp en tiempo real</p>
       </div>
-      <AnalyticsDashboard />
+      <AnalyticsTabs />
     </div>
   );
 }

@@ -67,7 +67,7 @@ export function Sidebar({ role, name, onClose }: SidebarProps) {
           </div>
           <div>
             <div className="text-sm font-semibold leading-none tracking-tight"
-              style={{ fontFamily: "'Clash Display','Space Grotesk',sans-serif", background: 'linear-gradient(90deg, #AE68FF, #C084FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              style={{ fontFamily: "'Bebas Neue','Space Grotesk',sans-serif", background: 'linear-gradient(90deg, #AE68FF, #C084FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               <span style={{ fontWeight: 400 }}>ZEN</span>SPORTS
             </div>
             <div className="text-[10px] text-gray-600 mt-0.5 font-medium tracking-wide uppercase">Admin Console</div>

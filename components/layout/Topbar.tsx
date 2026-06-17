@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { LogOut, Bell, Menu, Sparkles } from 'lucide-react';
+import { LogOut, Bell, Menu } from 'lucide-react';
 import type { AdminRole } from '@/types/admin';
 
 const ROLE_LABELS: Record<AdminRole, string> = {
@@ -51,10 +51,16 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
       </button>
 
       {/* Title */}
-      <div className="flex items-center gap-2 flex-1">
-        <Sparkles className="w-3.5 h-3.5 hidden sm:block" style={{ color: 'rgba(174,104,255,0.6)' }} />
+      <div className="flex items-center gap-2.5 flex-1">
+        {/* Z isotipo */}
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 hidden sm:flex"
+          style={{ background: 'linear-gradient(135deg, #6A00FF 0%, #AE68FF 100%)', boxShadow: '0 0 14px rgba(106,0,255,0.40)' }}>
+          <svg viewBox="0 0 24 24" fill="none" style={{ width: 14, height: 14 }}>
+            <path d="M5 7H19L5 17H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
         <h1 className="text-sm font-semibold tracking-tight"
-          style={{ fontFamily: "'Clash Display','Space Grotesk',sans-serif", background: 'linear-gradient(90deg, #EFFFFF, #AE68FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          style={{ fontFamily: "'Bebas Neue','Space Grotesk',sans-serif", fontSize: 16, letterSpacing: 2, background: 'linear-gradient(90deg, #EFFFFF, #AE68FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {title}
         </h1>
       </div>
