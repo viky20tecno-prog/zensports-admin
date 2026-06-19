@@ -8,7 +8,7 @@ import { ClubStatusBadge } from '@/components/clubs/ClubStatusBadge';
 import { ClubActionsMenu } from '@/components/clubs/ClubActionsMenu';
 import { ClubDetailTabs } from '@/components/clubs/detail/ClubDetailTabs';
 import { canAccess } from '@/lib/rbac';
-import type { ClubFullDetail, Player, Pago, AuditEvent, BillingRecord } from '@/types/club';
+import type { ClubFullDetail, Player, Pago, AuditEvent, BillingRecord, ActivityLog } from '@/types/club';
 
 async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
   const { data: club, error } = await adminDb.from('clubs').select('*').eq('slug', slug).single();
@@ -20,6 +20,7 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
     { data: pagoRows },
     { data: auditRows },
     { data: billingRows },
+    { data: clubActivityRows },
   ] = await Promise.all([
     adminDb
       .from('players')
@@ -49,6 +50,12 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
       .eq('club_id', club.id)
       .order('periodo', { ascending: false })
       .limit(24),
+    adminDb
+      .from('club_activity_logs')
+      .select('*')
+      .eq('club_id', club.id)
+      .order('created_at', { ascending: false })
+      .limit(200),
   ]);
 
   const player_count = playerRows?.length || 0;
@@ -71,6 +78,7 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
     pagos: (pagoRows || []) as Pago[],
     audit_events: (auditRows || []) as AuditEvent[],
     billing_records: (billingRows || []) as BillingRecord[],
+    activity_logs: (clubActivityRows || []) as ActivityLog[],
   };
 }
 

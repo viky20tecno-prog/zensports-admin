@@ -8,11 +8,13 @@ import { PaymentsTab } from './PaymentsTab';
 import { AuditTab } from './AuditTab';
 import { NotesTab } from './NotesTab';
 import { BillingTab } from './BillingTab';
+import { ActivityTab } from './ActivityTab';
 
 const TABS = [
   { id: 'overview',   label: 'Overview' },
   { id: 'players',    label: 'Jugadores' },
   { id: 'payments',   label: 'Pagos' },
+  { id: 'activity',   label: 'Actividad' },
   { id: 'billing',    label: 'Facturación' },
   { id: 'audit',      label: 'Auditoría' },
   { id: 'notes',      label: 'Notas' },
@@ -49,6 +51,9 @@ export function ClubDetailTabs({ detail, role }: Props) {
             {tab.id === 'payments' && (
               <span className="ml-1.5 text-xs text-gray-600">({detail.pagos.length})</span>
             )}
+            {tab.id === 'activity' && (
+              <span className="ml-1.5 text-xs text-gray-600">({detail.activity_logs.length})</span>
+            )}
             {tab.id === 'audit' && (
               <span className="ml-1.5 text-xs text-gray-600">({detail.audit_events.length})</span>
             )}
@@ -62,6 +67,7 @@ export function ClubDetailTabs({ detail, role }: Props) {
         {active === 'players'   && <PlayersTab players={detail.players} />}
         {active === 'payments'  && <PaymentsTab pagos={detail.pagos} />}
         {active === 'billing'   && <BillingTab detail={detail} initialRecords={detail.billing_records} />}
+        {active === 'activity'  && <ActivityTab logs={detail.activity_logs} />}
         {active === 'audit'     && <AuditTab events={detail.audit_events} />}
         {active === 'notes'     && <NotesTab slug={detail.slug} initialNotes={detail.admin_notes ?? ''} />}
       </div>

@@ -111,9 +111,26 @@ export interface BillingRecord {
   created_at: string;
 }
 
+export interface ActivityLog {
+  id: string;
+  club_id: string;
+  club_slug: string;
+  user_id?: string | null;
+  user_email: string;
+  user_role?: string | null;
+  user_name?: string | null;
+  action: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  entity_label?: string | null;
+  details?: Record<string, unknown> | null;
+  created_at: string;
+}
+
 export interface ClubFullDetail extends ClubWithMetrics {
   players: Player[];
   pagos: Pago[];
   audit_events: AuditEvent[];
   billing_records: BillingRecord[];
+  activity_logs: ActivityLog[];
 }
