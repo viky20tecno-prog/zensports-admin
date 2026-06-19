@@ -13,15 +13,25 @@ export async function GET() {
   const hace7d  = new Date(now.getTime() - 7 * 86400000).toISOString();
   const hace30d = new Date(now.getTime() - 30 * 86400000).toISOString();
 
-  const [{ data: sessions }, { data: leads }, { data: clubs }] = await Promise.all([
+  const [sessionsRes, leadsRes, clubsRes] = await Promise.all([
     adminDb.from('wa_sessions').select('phone, rol, updated_at, messages, last_interaction, tools_used, contexto').order('updated_at', { ascending: false }),
     adminDb.from('leads').select('created_at, fuente, nombre_club, deporte, ciudad').eq('fuente', 'whatsapp').order('created_at', { ascending: false }),
     adminDb.from('clubs').select('id, slug, config').not('config->wa_metrics', 'is', null),
   ]);
 
-  const allSessions = sessions || [];
-  const allLeads    = leads    || [];
-  const allClubs    = clubs    || [];
+  if (sessionsRes.error) console.error('[wa-analytics] wa_sessions error:', sessionsRes.error.message);
+  if (leadsRes.error)    console.error('[wa-analytics] leads error:',       leadsRes.error.message);
+  if (clubsRes.error)    console.error('[wa-analytics] clubs error:',       clubsRes.error.message);
+
+  // Si la query de sessions falla por columnas faltantes, intentar con columnas básicas
+  let allSessions = sessionsRes.data || [];
+  if (sessionsRes.error && sessionsRes.error.message.includes('column')) {
+    const fallback = await adminDb.from('wa_sessions').select('phone, rol, updated_at, messages').order('updated_at', { ascending: false });
+    allSessions = (fallback.data || []).map(s => ({ ...s, last_interaction: null, tools_used: null, contexto: null }));
+  }
+
+  const allLeads = leadsRes.data || [];
+  const allClubs = clubsRes.data || [];
 
   // Sesiones por rol
   const porRol = { admin: 0, jugador: 0, visitante: 0, unknown: 0 };
@@ -108,6 +118,11 @@ export async function GET() {
   }));
 
   return NextResponse.json({
+    _debug: {
+      sessions_count: allSessions.length,
+      sessions_error: sessionsRes.error?.message || null,
+      leads_error:    leadsRes.error?.message    || null,
+    },
     resumen: {
       total_sesiones:  allSessions.length,
       activos_hoy:     activos24h,
