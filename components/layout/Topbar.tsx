@@ -60,7 +60,7 @@ export function Topbar({ title, role, onMenuClick }: TopbarProps) {
           </svg>
         </div>
         <h1 className="text-sm font-semibold tracking-tight"
-          style={{ fontFamily: "'Bebas Neue','Space Grotesk',sans-serif", fontSize: 16, letterSpacing: 2, background: 'linear-gradient(90deg, #EFFFFF, #AE68FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          style={{ fontFamily: "'Sport Event','Space Grotesk',sans-serif", fontSize: 16, letterSpacing: 2, background: 'linear-gradient(90deg, #EFFFFF, #AE68FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           {title}
         </h1>
       </div>
