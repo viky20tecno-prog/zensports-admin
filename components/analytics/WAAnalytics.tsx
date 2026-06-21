@@ -25,6 +25,7 @@ interface WAData {
   actividadChart: { fecha: string; sesiones: number }[];
   leadsChart: { mes: string; leads: number }[];
   recordatoriosClubs: { slug: string; nombre: string; total_recordatorios: number; ultimo_recordatorio: string | null; ultimo_enviados: number }[];
+  mensajesPorClub: { club: string; sesiones: number; mensajes: number }[];
   ultimasConversaciones: { phone: string; rol: string; ultima_interaccion: string; mensajes: number; club: string | null }[];
 }
 
@@ -83,7 +84,7 @@ export function WAAnalytics() {
   if (loading) return <div className="text-gray-600 text-sm py-12 text-center">Cargando analítica WhatsApp...</div>;
   if (!data)   return <div className="text-red-400 text-sm py-12 text-center">Error cargando datos</div>;
 
-  const { resumen, porRol, topTools, actividadChart, leadsChart, recordatoriosClubs, ultimasConversaciones } = data;
+  const { resumen, porRol, topTools, actividadChart, leadsChart, recordatoriosClubs, mensajesPorClub, ultimasConversaciones } = data;
   const totalRol = porRol.admin + porRol.jugador + porRol.visitante;
 
   return (
@@ -217,6 +218,33 @@ export function WAAnalytics() {
                     <td className="py-2 text-right text-gray-600 text-xs">
                       {c.ultimo_recordatorio ? new Date(c.ultimo_recordatorio).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }) : '—'}
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Mensajes por club este mes */}
+      {mensajesPorClub && mensajesPorClub.length > 0 && (
+        <div className="rounded-xl border border-white/8 bg-white/2 p-4">
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">Mensajes por club — este mes</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/6">
+                  <th className="text-left text-xs text-gray-600 font-medium pb-2 pr-4">Club</th>
+                  <th className="text-right text-xs text-gray-600 font-medium pb-2 pr-4">Sesiones</th>
+                  <th className="text-right text-xs text-gray-600 font-medium pb-2">Mensajes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/4">
+                {mensajesPorClub.map((c, i) => (
+                  <tr key={i} className="hover:bg-white/3 transition-colors">
+                    <td className="py-2 pr-4 text-gray-200 font-medium">{c.club}</td>
+                    <td className="py-2 pr-4 text-right text-gray-400">{c.sesiones}</td>
+                    <td className="py-2 text-right text-violet-400 font-bold">{c.mensajes}</td>
                   </tr>
                 ))}
               </tbody>

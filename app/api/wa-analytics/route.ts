@@ -108,6 +108,21 @@ export async function GET() {
     leads,
   }));
 
+  // Mensajes por club este mes
+  const inicioMes = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const mensajesPorClub: Record<string, { club: string; sesiones: number; mensajes: number }> = {};
+  allSessions
+    .filter(s => (s.last_interaction || s.updated_at) >= inicioMes)
+    .forEach(s => {
+      const club = (s.contexto as Record<string, string> | null)?.club_nombre;
+      if (!club) return;
+      if (!mensajesPorClub[club]) mensajesPorClub[club] = { club, sesiones: 0, mensajes: 0 };
+      mensajesPorClub[club].sesiones++;
+      mensajesPorClub[club].mensajes += Array.isArray(s.messages) ? s.messages.length : 0;
+    });
+  const mensajesPorClubArr = Object.values(mensajesPorClub)
+    .sort((a, b) => b.mensajes - a.mensajes);
+
   // Últimas 10 conversaciones
   const ultimasConversaciones = allSessions.slice(0, 10).map(s => ({
     phone: String(s.phone || '').slice(-4).padStart(String(s.phone || '').length, '*'),
@@ -136,6 +151,7 @@ export async function GET() {
     actividadChart,
     leadsChart: leadsChartArr,
     recordatoriosClubs,
+    mensajesPorClub: mensajesPorClubArr,
     ultimasConversaciones,
   });
 }
