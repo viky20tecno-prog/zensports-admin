@@ -26,15 +26,17 @@ export function PaymentsTab({ pagos }: Props) {
         <span className="text-gray-500">{pagos.length} pagos · últimos 50</span>
         <span className="text-gray-300 font-medium">Total: {formatCOP(total)}</span>
       </div>
-      <div className="rounded-xl border border-white/8 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-xl border border-white/8 overflow-x-auto">
+        <table className="w-full min-w-[480px] text-sm">
           <thead className="bg-white/3 border-b border-white/8">
             <tr>
-              {['Cédula', 'Concepto', 'Monto', 'Banco', 'Referencia', 'Estado', 'Fecha'].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {h}
-                </th>
-              ))}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Cédula</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Banco</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Referencia</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -42,17 +44,17 @@ export function PaymentsTab({ pagos }: Props) {
               const estado = ESTADO_LABELS[p.estado_revision] ?? { label: p.estado_revision, color: 'bg-gray-500/10 text-gray-400' };
               return (
                 <tr key={p.id} className="hover:bg-white/3 transition-colors">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{p.cedula}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{p.cedula}</td>
                   <td className="px-4 py-3 text-gray-300 text-xs capitalize">{p.concepto}</td>
-                  <td className="px-4 py-3 text-white text-sm font-medium">{formatCOP(p.monto)}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{p.banco}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs font-mono">{p.referencia || '—'}</td>
+                  <td className="px-4 py-3 text-white text-sm font-medium whitespace-nowrap">{formatCOP(p.monto)}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs hidden md:table-cell">{p.banco}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs font-mono hidden lg:table-cell">{p.referencia || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${estado.color}`}>
                       {estado.label}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(p.created_at)}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{formatDate(p.created_at)}</td>
                 </tr>
               );
             })}

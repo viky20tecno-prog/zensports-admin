@@ -116,13 +116,15 @@ export function AuditLogsTable() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-white/8 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-xl border border-white/8 overflow-x-auto">
+        <table className="w-full min-w-[500px] text-sm">
           <thead className="bg-white/3 border-b border-white/8">
             <tr>
-              {['Acción', 'Admin', 'Club', 'Cambio', 'Fecha'].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
-              ))}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Admin</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Cambio</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -138,17 +140,21 @@ export function AuditLogsTable() {
               return (
                 <tr key={log.id} className="hover:bg-white/3 transition-colors">
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-md border ${style}`}>{label}</span>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-md border whitespace-nowrap ${style}`}>{label}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{log.admin_email}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs max-w-[140px] truncate hidden md:table-cell">{log.admin_email}</td>
                   <td className="px-4 py-3 text-gray-300 text-xs font-mono">{log.entity_id ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 text-xs font-mono flex-wrap max-w-[280px]">
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    <div className="flex flex-col gap-1 text-xs font-mono max-w-[200px]">
                       {log.before_state && (
-                        <span className="text-red-400/70">- {JSON.stringify(log.before_state)}</span>
+                        <span className="text-red-400/70 truncate" title={JSON.stringify(log.before_state)}>
+                          - {JSON.stringify(log.before_state)}
+                        </span>
                       )}
                       {log.after_state && (
-                        <span className="text-green-400/70">+ {JSON.stringify(log.after_state)}</span>
+                        <span className="text-green-400/70 truncate" title={JSON.stringify(log.after_state)}>
+                          + {JSON.stringify(log.after_state)}
+                        </span>
                       )}
                     </div>
                   </td>

@@ -125,6 +125,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const columns: ColumnDef<ClubWithMetrics>[] = [
     {
       id: 'select',
+      meta: { className: 'hidden md:table-cell' },
       header: ({ table: t }) => {
         const rows = t.getRowModel().rows.map(r => r.original);
         const allSelected = rows.length > 0 && selected.size === rows.length;
@@ -172,6 +173,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'trial_days_left',
+      meta: { className: 'hidden lg:table-cell' },
       header: 'Trial',
       cell: ({ row }) => {
         const { trial_days_left: days, status } = row.original;
@@ -183,6 +185,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'player_count',
+      meta: { className: 'hidden md:table-cell' },
       header: ({ column }) => (
         <button
           title="Número de jugadores registrados en el club"
@@ -195,6 +198,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'health_score',
+      meta: { className: 'hidden lg:table-cell' },
       header: ({ column }) => (
         <div className="flex items-center gap-1">
           <button
@@ -222,6 +226,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'onboarding_pct',
+      meta: { className: 'hidden lg:table-cell' },
       header: () => (
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Onb.</span>
@@ -239,6 +244,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       id: 'billing',
+      meta: { className: 'hidden lg:table-cell' },
       header: 'Facturación',
       cell: ({ row }) => {
         const { status, config, trial_days_left } = row.original;
@@ -274,6 +280,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
     },
     {
       accessorKey: 'created_at',
+      meta: { className: 'hidden lg:table-cell' },
       header: ({ column }) => (
         <button className="flex items-center gap-1 text-gray-400 hover:text-white text-xs uppercase tracking-wider"
           onClick={() => column.toggleSorting()}>
@@ -320,17 +327,17 @@ export function ClubsTable({ initialClubs, role }: Props) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
           <Input
             placeholder="Buscar club o slug..."
             value={globalFilter}
             onChange={e => setGlobalFilter(e.target.value)}
-            className="pl-8 bg-white/5 border-white/10 text-white placeholder:text-gray-600 h-8 text-sm"
+            className="pl-8 bg-white/5 border-white/10 text-white placeholder:text-gray-600 h-8 text-sm w-full"
           />
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
           {STATUS_FILTER.map(f => (
             <button key={f.value} onClick={() => setStatusFilter(f.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
@@ -343,7 +350,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
           ))}
         </div>
         {loading && <span className="text-xs text-gray-500 animate-pulse">Actualizando...</span>}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto">
           <button onClick={handleExport}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
             <Download className="w-3.5 h-3.5" /> CSV
@@ -381,15 +388,18 @@ export function ClubsTable({ initialClubs, role }: Props) {
 
       {/* Table */}
       <div className="rounded-xl border border-white/8 overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[480px] text-sm">
           <thead className="bg-white/3 border-b border-white/8">
             {table.getHeaderGroups().map(hg => (
               <tr key={hg.id}>
-                {hg.headers.map(h => (
-                  <th key={h.id} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {flexRender(h.column.columnDef.header, h.getContext())}
-                  </th>
-                ))}
+                {hg.headers.map(h => {
+                  const cls = (h.column.columnDef.meta as { className?: string } | undefined)?.className ?? '';
+                  return (
+                    <th key={h.id} className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${cls}`}>
+                      {flexRender(h.column.columnDef.header, h.getContext())}
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -403,11 +413,14 @@ export function ClubsTable({ initialClubs, role }: Props) {
             ) : (
               table.getRowModel().rows.map(row => (
                 <tr key={row.id} className="hover:bg-white/3 transition-colors">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-4 py-3">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+                  {row.getVisibleCells().map(cell => {
+                    const cls = (cell.column.columnDef.meta as { className?: string } | undefined)?.className ?? '';
+                    return (
+                      <td key={cell.id} className={`px-4 py-3 ${cls}`}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}

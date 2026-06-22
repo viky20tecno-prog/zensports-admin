@@ -13,15 +13,16 @@ export function PlayersTab({ players }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-white/8 overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="rounded-xl border border-white/8 overflow-x-auto">
+      <table className="w-full min-w-[480px] text-sm">
         <thead className="bg-white/3 border-b border-white/8">
           <tr>
-            {['Jugador', 'Cédula', 'Categoría', 'Posición', 'Estado', 'Registro'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {h}
-              </th>
-            ))}
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jugador</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Cédula</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoría</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Posición</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Registro</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
@@ -30,21 +31,21 @@ export function PlayersTab({ players }: Props) {
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   {p.foto_url ? (
-                    <img src={p.foto_url} alt="" className="w-7 h-7 rounded-full object-cover border border-white/10" />
+                    <img src={p.foto_url} alt="" className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-400 font-medium">
+                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-gray-400 font-medium shrink-0">
                       {p.nombre?.charAt(0) ?? '?'}
                     </div>
                   )}
-                  <div>
-                    <div className="text-white text-sm font-medium">{p.nombre} {p.apellidos}</div>
+                  <div className="min-w-0">
+                    <div className="text-white text-sm font-medium truncate">{p.nombre} {p.apellidos}</div>
                     {p.celular && <div className="text-xs text-gray-600">{p.celular}</div>}
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-3 text-gray-400 text-xs">{p.cedula}</td>
-              <td className="px-4 py-3 text-gray-400 text-xs">{p.categoria || '—'}</td>
-              <td className="px-4 py-3 text-gray-500 text-xs">{p.posicion || '—'}</td>
+              <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{p.cedula}</td>
+              <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{p.categoria || '—'}</td>
+              <td className="px-4 py-3 text-gray-500 text-xs hidden lg:table-cell">{p.posicion || '—'}</td>
               <td className="px-4 py-3">
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                   p.activo
@@ -54,7 +55,7 @@ export function PlayersTab({ players }: Props) {
                   {p.activo ? 'Activo' : 'Inactivo'}
                 </span>
               </td>
-              <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(p.created_at)}</td>
+              <td className="px-4 py-3 text-gray-600 text-xs hidden md:table-cell">{formatDate(p.created_at)}</td>
             </tr>
           ))}
         </tbody>

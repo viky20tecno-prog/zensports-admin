@@ -33,12 +33,12 @@ export function ClubDetailTabs({ detail, role }: Props) {
   return (
     <div className="space-y-4">
       {/* Tab bar */}
-      <div className="flex gap-1 border-b border-white/8 pb-0">
+      <div className="flex gap-1 border-b border-white/8 pb-0 overflow-x-auto whitespace-nowrap scrollbar-none">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActive(tab.id)}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+            className={`flex-shrink-0 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               active === tab.id
                 ? 'border-indigo-500 text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-200'
