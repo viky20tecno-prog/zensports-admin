@@ -8,6 +8,7 @@ const ACTION_META: Record<string, { label: string; color: string }> = {
   CLUB_UNLOCKED:         { label: 'Club reactivado',     color: 'bg-green-500/20 text-green-300 border-green-500/30' },
   CLUB_MODULES_UPDATED:  { label: 'Módulos actualizados',color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
   CLUB_IMPERSONATED:     { label: 'Acceso impersonado',  color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
+  CLUB_CONFIG_EDITED:    { label: 'Config editada',      color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
 };
 
 interface Props { events: AuditEvent[] }

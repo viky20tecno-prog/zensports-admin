@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { formatCOP, formatDate, formatRelative, PLAN_PRICE } from '@/lib/utils';
 import { MODULE_KEYS, MODULE_LABELS, isModuleUnlocked } from '@/lib/plan-modules';
 import { EditAdminContactDialog } from '@/components/clubs/EditAdminContactDialog';
+import { EditClubConfigDialog } from '@/components/clubs/EditClubConfigDialog';
 import type { ClubFullDetail } from '@/types/club';
 import type { ModuleKey } from '@/lib/plan-modules';
 
@@ -41,6 +42,8 @@ export function OverviewTab({ detail }: Props) {
   const [modulos, setModulos] = useState<Record<string, boolean>>((cfg.modulos ?? {}) as Record<string, boolean>);
   const [toggling, setToggling] = useState<string | null>(null);
   const [editContact, setEditContact] = useState(false);
+  const [editConfig,  setEditConfig]  = useState(false);
+  const [configNombre, setConfigNombre] = useState(cfg.nombre || '');
   const [ownerEmail,  setOwnerEmail]  = useState(detail.owner_email ?? '');
   const [celularAdmin, setCelularAdmin] = useState(detail.celular_admin ?? '');
   const [staff, setStaff] = useState<string[]>(cfg.celulares_staff ?? []);
@@ -83,14 +86,23 @@ export function OverviewTab({ detail }: Props) {
       <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Configuración</h3>
-          <button
-            onClick={() => setEditContact(true)}
-            className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition"
-          >
-            <Pencil className="w-3 h-3" /> Cambiar admin
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setEditConfig(true)}
+              className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 transition"
+            >
+              <Pencil className="w-3 h-3" /> Editar config
+            </button>
+            <button
+              onClick={() => setEditContact(true)}
+              className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition"
+            >
+              <Pencil className="w-3 h-3" /> Cambiar admin
+            </button>
+          </div>
         </div>
         <dl className="space-y-2 text-sm">
+          <Row label="Nombre" value={<span className="font-semibold text-white">{configNombre || '—'}</span>} />
           <Row label="Plan" value={
             <span className="capitalize">
               {plan} {price > 0 && <span className="text-gray-600 text-xs ml-1">{formatCOP(price)}/mes</span>}
@@ -113,6 +125,18 @@ export function OverviewTab({ detail }: Props) {
           <Row label="Creado" value={formatDate(detail.created_at)} />
         </dl>
       </section>
+
+      {editConfig && (
+        <EditClubConfigDialog
+          club={detail}
+          open={editConfig}
+          onClose={() => setEditConfig(false)}
+          onSuccess={(patch) => {
+            if (patch.nombre) setConfigNombre(patch.nombre as string);
+            setEditConfig(false);
+          }}
+        />
+      )}
 
       {editContact && (
         <EditAdminContactDialog

@@ -20,7 +20,8 @@ export type AuditAction =
   | 'BILLING_RECORDED'
   | 'IMPERSONATE'
   | 'STAFF_ADDED'
-  | 'STAFF_REMOVED';
+  | 'STAFF_REMOVED'
+  | 'CLUB_CONFIG_EDITED';
 
 interface WriteAuditLogParams {
   admin_id?: string;
