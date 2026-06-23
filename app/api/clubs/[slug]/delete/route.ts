@@ -18,6 +18,8 @@ const CHILD_TABLES = [
   'nomina_pagos',
   'nomina_empleados',
   'partidos',
+  'plantillas_mensajes',
+  'club_activity_logs',
 ] as const;
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -46,6 +48,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ slug
   // Borrar players y club_members
   await adminDb.from('players').delete().eq('club_id', clubId);
   await adminDb.from('club_members').delete().eq('club_id', clubId);
+
+  // Limpiar wa_sessions cuyo contexto apunte a este club
+  await adminDb.from('wa_sessions').delete().filter('contexto->>club_id', 'eq', clubId);
 
   // Borrar el club
   const { error } = await adminDb.from('clubs').delete().eq('id', clubId);
