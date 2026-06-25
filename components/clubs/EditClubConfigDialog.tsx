@@ -25,7 +25,8 @@ export function EditClubConfigDialog({ club, open, onClose, onSuccess }: Props) 
   const [ciudad,    setCiudad]    = useState(cfg.ciudad      || '');
   const [color,     setColor]     = useState(cfg.color       || '#E14924');
   const [logoUrl,   setLogoUrl]   = useState(cfg.logo_url    || '');
-  const [whatsapp,  setWhatsapp]  = useState(cfg.whatsapp    || '');
+  const [whatsapp,    setWhatsapp]    = useState(cfg.whatsapp     || '');
+  const [wahaSession, setWahaSession] = useState((cfg as Record<string, unknown>).waha_session as string || '');
   const [mensualidad, setMensualidad] = useState(String(cfg.valor_mensualidad || ''));
 
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,7 @@ export function EditClubConfigDialog({ club, open, onClose, onSuccess }: Props) 
       color,
       logo_url:          logoUrl.trim() || null,
       whatsapp:          whatsapp.trim(),
+      waha_session:      wahaSession.trim() || null,
       valor_mensualidad: mensualidad ? parseInt(mensualidad.replace(/\D/g, ''), 10) : null,
     };
 
@@ -128,6 +130,14 @@ export function EditClubConfigDialog({ club, open, onClose, onSuccess }: Props) 
             <label className={field}>WhatsApp admin (con código de país)</label>
             <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value.replace(/\D/g, ''))}
               placeholder="573001234567" type="tel" className={inp} />
+          </div>
+
+          {/* Sesión WAHA */}
+          <div>
+            <label className={field}>Sesión WhatsApp plantillas (WAHA)</label>
+            <Input value={wahaSession} onChange={e => setWahaSession(e.target.value.trim())}
+              placeholder="city-fc (vacío = número central ZenSports)" className={inp} />
+            <p className="text-xs text-gray-500 mt-1">Nombre de la sesión WAHA del club para enviar plantillas masivas desde su propio número.</p>
           </div>
 
           {/* Mensualidad */}

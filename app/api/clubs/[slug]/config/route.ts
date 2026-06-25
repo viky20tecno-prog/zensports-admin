@@ -13,7 +13,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
   const body = await req.json() as Record<string, unknown>;
 
   const ALLOWED = ['nombre', 'subtitulo', 'ciudad', 'codigo_pais', 'color', 'logo_url',
-                   'valor_mensualidad', 'dias_gracia_mora', 'penalidad_mora', 'whatsapp'];
+                   'valor_mensualidad', 'dias_gracia_mora', 'penalidad_mora', 'whatsapp', 'waha_session'];
 
   const { data: club, error: fetchErr } = await adminDb
     .from('clubs').select('config').eq('slug', slug).single();
