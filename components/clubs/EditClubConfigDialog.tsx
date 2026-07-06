@@ -26,7 +26,7 @@ export function EditClubConfigDialog({ club, open, onClose, onSuccess }: Props) 
   const [color,     setColor]     = useState(cfg.color       || '#E14924');
   const [logoUrl,   setLogoUrl]   = useState(cfg.logo_url    || '');
   const [whatsapp,    setWhatsapp]    = useState(cfg.whatsapp     || '');
-  const [wahaSession, setWahaSession] = useState((cfg as Record<string, unknown>).waha_session as string || '');
+  const [wahaSession, setWahaSession] = useState(cfg.waha_session || '');
   const [mensualidad, setMensualidad] = useState(String(cfg.valor_mensualidad || ''));
 
   const [loading, setLoading] = useState(false);

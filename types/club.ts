@@ -34,6 +34,7 @@ export interface ClubConfig {
   deporte?: string;
   deportes?: string[];
   celulares_staff?: string[];
+  waha_session?: string;
 }
 
 export interface Club {
