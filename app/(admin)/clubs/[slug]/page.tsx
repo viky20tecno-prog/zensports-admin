@@ -142,6 +142,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           canExtendTrial={canAccess(role, 'extend_trial')}
           canDelete={canAccess(role, 'delete_club')}
           canResetPassword={canAccess(role, 'reset_password')}
+          canChangeEmail={canAccess(role, 'change_email')}
           canImpersonate={canAccess(role, 'impersonate')}
           onRefresh={undefined}
           redirectOnDelete="/clubs"

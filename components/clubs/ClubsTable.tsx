@@ -63,6 +63,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
   const canDelete       = canAccess(role, 'delete_club');
   const canImpersonate    = canAccess(role, 'impersonate');
   const canResetPassword  = canAccess(role, 'reset_password');
+  const canChangeEmail    = canAccess(role, 'change_email');
+  const canExportCsv      = canAccess(role, 'view_analytics');
+  const canCreateClub     = canAccess(role, 'create_club');
 
   function toggleSelect(slug: string) {
     setSelected(prev => { const n = new Set(prev); n.has(slug) ? n.delete(slug) : n.add(slug); return n; });
@@ -300,6 +303,7 @@ export function ClubsTable({ initialClubs, role }: Props) {
           canDelete={canDelete}
           canImpersonate={canImpersonate}
           canResetPassword={canResetPassword}
+          canChangeEmail={canChangeEmail}
           onRefresh={refresh}
         />
       ),
@@ -351,18 +355,22 @@ export function ClubsTable({ initialClubs, role }: Props) {
         </div>
         {loading && <span className="text-xs text-gray-500 animate-pulse">Actualizando...</span>}
         <div className="flex items-center gap-2 sm:ml-auto">
-          <button onClick={handleExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
-            <Download className="w-3.5 h-3.5" /> CSV
-          </button>
+          {canExportCsv && (
+            <button onClick={handleExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+              <Download className="w-3.5 h-3.5" /> CSV
+            </button>
+          )}
           <button onClick={handlePDF}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
             <FileText className="w-3.5 h-3.5" /> PDF
           </button>
-          <button onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600/20 text-xs text-indigo-300 hover:text-white hover:bg-indigo-600/40 transition-colors font-medium">
-            <Plus className="w-3.5 h-3.5" /> Crear club
-          </button>
+          {canCreateClub && (
+            <button onClick={() => setCreateOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-600/20 text-xs text-indigo-300 hover:text-white hover:bg-indigo-600/40 transition-colors font-medium">
+              <Plus className="w-3.5 h-3.5" /> Crear club
+            </button>
+          )}
         </div>
       </div>
 

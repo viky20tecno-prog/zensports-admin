@@ -23,12 +23,13 @@ interface Props {
   canExtendTrial: boolean;
   canDelete: boolean;
   canResetPassword?: boolean;
+  canChangeEmail?: boolean;
   canImpersonate?: boolean;
   onRefresh?: (() => void) | undefined;
   redirectOnDelete?: string;
 }
 
-export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, canResetPassword, canImpersonate, onRefresh, redirectOnDelete }: Props) {
+export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTrial, canDelete, canResetPassword, canChangeEmail, canImpersonate, onRefresh, redirectOnDelete }: Props) {
   const router = useRouter();
   const [dialog, setDialog] = useState<'plan' | 'trial' | null>(null);
   const [busy, setBusy] = useState(false);
@@ -186,23 +187,23 @@ export function ClubActionsMenu({ club, canChangePlan, canSuspend, canExtendTria
               </div>
             </DropdownMenuItem>
           )}
+          {canChangeEmail && (
+            <DropdownMenuItem onClick={() => { setNewEmail(club.owner_email || ''); setEmailError(''); setEmailDialog(true); }} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <Mail className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">Cambiar email</p>
+                <p className="text-xs text-gray-500 mt-1">Actualiza el correo de acceso del admin</p>
+              </div>
+            </DropdownMenuItem>
+          )}
           {canResetPassword && (
-            <>
-              <DropdownMenuItem onClick={() => { setNewEmail(club.owner_email || ''); setEmailError(''); setEmailDialog(true); }} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
-                <Mail className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium leading-none">Cambiar email</p>
-                  <p className="text-xs text-gray-500 mt-1">Actualiza el correo de acceso del admin</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleResetPassword} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
-                <KeyRound className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium leading-none">Restablecer contraseña</p>
-                  <p className="text-xs text-gray-500 mt-1">Genera un enlace de recuperación</p>
-                </div>
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem onClick={handleResetPassword} className="gap-3 cursor-pointer hover:bg-white/10 focus:bg-white/10 items-start py-2.5">
+              <KeyRound className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium leading-none">Restablecer contraseña</p>
+                <p className="text-xs text-gray-500 mt-1">Genera un enlace de recuperación</p>
+              </div>
+            </DropdownMenuItem>
           )}
           {canSuspend && (
             <>
