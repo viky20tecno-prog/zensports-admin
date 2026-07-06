@@ -9,12 +9,13 @@ interface Props {
   slug:          string;
   currentEmail:  string;
   currentCelular: string;
+  canChangeEmail?: boolean;
   open:          boolean;
   onClose:       () => void;
   onSuccess:     (email: string, celular: string) => void;
 }
 
-export function EditAdminContactDialog({ slug, currentEmail, currentCelular, open, onClose, onSuccess }: Props) {
+export function EditAdminContactDialog({ slug, currentEmail, currentCelular, canChangeEmail = false, open, onClose, onSuccess }: Props) {
   const [email,   setEmail]   = useState(currentEmail);
   const [celular, setCelular] = useState(currentCelular);
   const [loading, setLoading] = useState(false);
@@ -65,9 +66,12 @@ export function EditAdminContactDialog({ slug, currentEmail, currentCelular, ope
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="admin@email.com"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+              disabled={!canChangeEmail}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <p className="text-[10px] text-gray-600">Cuenta de acceso al dashboard del club</p>
+            <p className="text-[10px] text-gray-600">
+              {canChangeEmail ? 'Cuenta de acceso al dashboard del club' : 'Solo un Super Admin puede cambiar el email de acceso'}
+            </p>
           </div>
 
           <div className="space-y-1.5">

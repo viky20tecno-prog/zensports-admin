@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { ClubFullDetail } from '@/types/club';
 import type { AdminRole } from '@/types/admin';
+import { canAccess } from '@/lib/rbac';
 import { OverviewTab } from './OverviewTab';
 import { PlayersTab } from './PlayersTab';
 import { PaymentsTab } from './PaymentsTab';
@@ -29,12 +30,14 @@ interface Props {
 
 export function ClubDetailTabs({ detail, role }: Props) {
   const [active, setActive] = useState<TabId>('overview');
+  const canViewBilling = canAccess(role, 'manage_billing');
+  const visibleTabs = TABS.filter(tab => tab.id !== 'billing' || canViewBilling);
 
   return (
     <div className="space-y-4">
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-white/8 pb-0 overflow-x-auto whitespace-nowrap scrollbar-none">
-        {TABS.map(tab => (
+        {visibleTabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActive(tab.id)}
@@ -63,10 +66,10 @@ export function ClubDetailTabs({ detail, role }: Props) {
 
       {/* Tab content */}
       <div>
-        {active === 'overview'  && <OverviewTab detail={detail} />}
+        {active === 'overview'  && <OverviewTab detail={detail} role={role} />}
         {active === 'players'   && <PlayersTab players={detail.players} />}
         {active === 'payments'  && <PaymentsTab pagos={detail.pagos} />}
-        {active === 'billing'   && <BillingTab detail={detail} initialRecords={detail.billing_records} />}
+        {active === 'billing' && canViewBilling && <BillingTab detail={detail} initialRecords={detail.billing_records} />}
         {active === 'activity'  && <ActivityTab logs={detail.activity_logs} />}
         {active === 'audit'     && <AuditTab events={detail.audit_events} />}
         {active === 'notes'     && <NotesTab slug={detail.slug} initialNotes={detail.admin_notes ?? ''} />}

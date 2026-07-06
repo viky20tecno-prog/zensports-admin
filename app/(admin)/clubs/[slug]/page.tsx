@@ -10,7 +10,7 @@ import { ClubDetailTabs } from '@/components/clubs/detail/ClubDetailTabs';
 import { canAccess } from '@/lib/rbac';
 import type { ClubFullDetail, Player, Pago, AuditEvent, BillingRecord, ActivityLog } from '@/types/club';
 
-async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
+async function getClubDetail(slug: string, canViewBilling: boolean): Promise<ClubFullDetail | null> {
   const { data: club, error } = await adminDb.from('clubs').select('*').eq('slug', slug).single();
   if (error || !club) return null;
 
@@ -44,12 +44,14 @@ async function getClubDetail(slug: string): Promise<ClubFullDetail | null> {
       .eq('entity_id', slug)
       .order('created_at', { ascending: false })
       .limit(100),
-    adminDb
-      .from('admin_billing')
-      .select('*')
-      .eq('club_id', club.id)
-      .order('periodo', { ascending: false })
-      .limit(24),
+    canViewBilling
+      ? adminDb
+          .from('admin_billing')
+          .select('*')
+          .eq('club_id', club.id)
+          .order('periodo', { ascending: false })
+          .limit(24)
+      : Promise.resolve({ data: [] as BillingRecord[] }),
     adminDb
       .from('club_activity_logs')
       .select('*')
@@ -87,10 +89,9 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
   if (!session) redirect('/login');
 
   const { slug } = await params;
-  const detail = await getClubDetail(slug);
-  if (!detail) notFound();
-
   const role = session.role;
+  const detail = await getClubDetail(slug, canAccess(role, 'manage_billing'));
+  if (!detail) notFound();
 
   return (
     <div className="space-y-6">

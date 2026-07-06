@@ -6,7 +6,9 @@ import { formatCOP, formatDate, formatRelative, PLAN_PRICE } from '@/lib/utils';
 import { MODULE_KEYS, MODULE_LABELS, isModuleUnlocked } from '@/lib/plan-modules';
 import { EditAdminContactDialog } from '@/components/clubs/EditAdminContactDialog';
 import { EditClubConfigDialog } from '@/components/clubs/EditClubConfigDialog';
+import { canAccess } from '@/lib/rbac';
 import type { ClubFullDetail } from '@/types/club';
+import type { AdminRole } from '@/types/admin';
 import type { ModuleKey } from '@/lib/plan-modules';
 
 const HEALTH_COLOR: Record<string, string> = {
@@ -32,9 +34,9 @@ const PLAN_UPGRADE_LABEL: Record<string, string> = {
   total:   '',
 };
 
-interface Props { detail: ClubFullDetail }
+interface Props { detail: ClubFullDetail; role: AdminRole }
 
-export function OverviewTab({ detail }: Props) {
+export function OverviewTab({ detail, role }: Props) {
   const cfg = detail.config;
   const plan = cfg.plan;
   const price = PLAN_PRICE[plan] ?? 0;
@@ -143,6 +145,7 @@ export function OverviewTab({ detail }: Props) {
           slug={detail.slug}
           currentEmail={ownerEmail}
           currentCelular={celularAdmin}
+          canChangeEmail={canAccess(role, 'change_email')}
           open={editContact}
           onClose={() => setEditContact(false)}
           onSuccess={(email, celular) => { setOwnerEmail(email); setCelularAdmin(celular); }}
