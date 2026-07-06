@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, ShieldCheck, ToggleLeft, ToggleRight, Loader2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { AdminRole } from '@/types/admin';
 
 const ROLES: AdminRole[] = ['super_admin', 'comercial', 'soporte', 'finanzas', 'ops'];
@@ -118,10 +119,18 @@ export function AdminUsersPanel({ currentUserId }: { currentUserId: string }) {
             <input required type="email" placeholder="Email" value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
               className="h-8 rounded-lg border border-white/10 bg-white/5 text-sm text-white placeholder:text-gray-600 px-3 focus:outline-none focus:border-indigo-500/40" />
-            <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as AdminRole }))}
-              className="h-8 rounded-lg border border-white/10 bg-white/5 text-sm text-gray-300 px-3 focus:outline-none focus:border-indigo-500/40">
-              {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
-            </select>
+            <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v as AdminRole }))}>
+              <SelectTrigger className="h-8 w-full bg-white/5 border-white/10 text-sm text-gray-300">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0F1219] border-white/10">
+                {ROLES.map(r => (
+                  <SelectItem key={r} value={r} className="text-gray-200 focus:bg-white/10 focus:text-white">
+                    {ROLE_LABELS[r]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <input required type="password" placeholder="Contraseña temporal" value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
               className="h-8 rounded-lg border border-white/10 bg-white/5 text-sm text-white placeholder:text-gray-600 px-3 focus:outline-none focus:border-indigo-500/40" />
@@ -177,11 +186,18 @@ export function AdminUsersPanel({ currentUserId }: { currentUserId: string }) {
                       {ROLE_LABELS[user.role]}
                     </span>
                   ) : (
-                    <select value={user.role}
-                      onChange={e => changeRole(user, e.target.value as AdminRole)}
-                      className="text-xs rounded-md border border-white/10 bg-white/5 text-gray-300 px-2 py-1 focus:outline-none focus:border-indigo-500/40">
-                      {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
-                    </select>
+                    <Select value={user.role} onValueChange={v => changeRole(user, v as AdminRole)}>
+                      <SelectTrigger className="h-7 text-xs bg-white/5 border-white/10 text-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0F1219] border-white/10">
+                        {ROLES.map(r => (
+                          <SelectItem key={r} value={r} className="text-gray-200 focus:bg-white/10 focus:text-white">
+                            {ROLE_LABELS[r]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </td>
                 <td className="px-4 py-3 text-gray-600 text-xs">
