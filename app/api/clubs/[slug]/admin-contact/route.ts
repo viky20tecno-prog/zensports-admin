@@ -15,6 +15,13 @@ export async function PATCH(
   const { slug } = await params;
   const body = await req.json() as { email?: string; celular_admin?: string };
 
+  // Cambiar el email del owner es el paso previo a una toma de cuenta completa
+  // (cambiar email + reset password = entrar como el club sin que se entere el owner).
+  // Requiere permiso separado, más restrictivo que solo reset_password.
+  if (body.email?.trim() && !canAccess(session.role, 'change_email')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { data: club } = await adminDb.from('clubs').select('id, owner_user_id, celular_admin').eq('slug', slug).maybeSingle();
   if (!club) return NextResponse.json({ error: 'Club no encontrado' }, { status: 404 });
 

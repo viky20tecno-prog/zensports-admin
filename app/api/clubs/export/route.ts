@@ -3,6 +3,7 @@ import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { PLAN_PRICE } from '@/lib/utils';
 import { getClubStatus, getTrialDaysLeft } from '@/lib/health-score';
+import { canAccess } from '@/lib/rbac';
 
 const SEP = ';';
 
@@ -16,6 +17,7 @@ function escape(val: string | number | null | undefined): string {
 export async function GET() {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'view_analytics')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const [{ data: clubs }, { data: players }] = await Promise.all([
     adminDb.from('clubs').select('*').order('created_at', { ascending: false }),

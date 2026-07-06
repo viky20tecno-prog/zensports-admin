@@ -10,7 +10,7 @@ export async function POST(
 ) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!canAccess(session.role, 'reset_password')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!canAccess(session.role, 'change_email')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { slug } = await params;
   const { email: newEmail } = await req.json();

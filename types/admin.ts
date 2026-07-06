@@ -32,4 +32,7 @@ export type Permission =
   | 'impersonate'
   | 'delete_club'
   | 'reset_password'
-  | 'edit_club';
+  | 'edit_club'
+  | 'manage_billing'
+  | 'create_club'
+  | 'change_email';

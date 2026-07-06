@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
+import { canAccess } from '@/lib/rbac';
 
 export async function GET(
   _req: Request,
@@ -9,6 +10,7 @@ export async function GET(
 ) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'manage_billing')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { slug } = await params;
   const { data: club } = await adminDb.from('clubs').select('id').eq('slug', slug).maybeSingle();
@@ -31,6 +33,7 @@ export async function POST(
 ) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'manage_billing')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { slug } = await params;
   const body = await req.json();

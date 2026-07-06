@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
+import { canAccess } from '@/lib/rbac';
 
 function generarSlug(nombre: string) {
   return nombre
@@ -14,6 +15,7 @@ function generarSlug(nombre: string) {
 export async function POST(request: Request) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'create_club')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { nombre_club, ciudad, email, password, nombre_admin, celular_admin } = await request.json();
 
