@@ -161,7 +161,9 @@ export function OverviewTab({ detail, role }: Props) {
         <ul className="space-y-2">
           {MODULE_KEYS.map(key => {
             const unlocked = isModuleUnlocked(plan, key);
-            const active = modulos[key] ?? false;
+            // Igual que Dashboard.jsx del club (modulos[id] !== false): si el módulo
+            // nunca se guardó explícitamente en config.modulos, se considera activo.
+            const active = modulos[key] !== false;
             const isToggling = toggling === key;
             const upgradeNeeded = PLAN_UPGRADE_LABEL[plan];
 
