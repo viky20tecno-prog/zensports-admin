@@ -27,6 +27,7 @@ const ONBOARDING_STEPS = [
 ];
 
 const PLAN_UPGRADE_LABEL: Record<string, string> = {
+  free:    'Starter+',
   trial:   'Starter+',
   starter: 'Pro+',
   pro:     'Scale',
@@ -220,7 +221,7 @@ export function OverviewTab({ detail, role }: Props) {
         <ul className="space-y-2 text-sm">
           <HealthRow label="Onboarding completado"      pts={20} earned={cfg.onboarding_completed ? 20 : 0} />
           <HealthRow label="Jugadores (máx 10→20 pts)"  pts={20} earned={Math.round(Math.min(detail.player_count, 10) / 10 * 20)} />
-          <HealthRow label="Plan activo (no trial)"      pts={20} earned={plan !== 'trial' ? 20 : 0} />
+          <HealthRow label="Plan activo (no trial/free)" pts={20} earned={plan !== 'trial' && plan !== 'free' ? 20 : 0} />
           <HealthRow label="Trial vigente"               pts={15} earned={plan === 'trial' && cfg.trial_ends_at && new Date(cfg.trial_ends_at) > new Date() ? 15 : 0} />
           <HealthRow label="WhatsApp configurado"        pts={15} earned={cfg.whatsapp ? 15 : 0} />
           <HealthRow label="Actividad últimos 14 días"   pts={10} earned={detail.health_score >= 10 ? 10 : 0} />

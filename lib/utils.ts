@@ -33,6 +33,7 @@ export function formatRelative(dateStr: string): string {
 }
 
 export const PLAN_PRICE: Record<string, number> = {
+  free:    0,
   trial:   0,
   starter: 149000,
   pro:     399000,

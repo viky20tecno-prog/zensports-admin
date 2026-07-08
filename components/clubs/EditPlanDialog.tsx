@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { ClubWithMetrics } from '@/types/club';
 
 const PLANS = [
+  { value: 'free',    label: 'Free (20 jugadores, siempre)' },
   { value: 'trial',   label: 'Trial (gratis)' },
   { value: 'starter', label: 'Starter — $149.000/mes' },
   { value: 'pro',     label: 'Pro — $399.000/mes' },

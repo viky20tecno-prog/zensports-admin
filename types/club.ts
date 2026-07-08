@@ -1,5 +1,5 @@
 export type ClubStatus = 'active' | 'trial' | 'suspended' | 'expired';
-export type ClubPlan = 'trial' | 'starter' | 'pro' | 'scale' | 'total';
+export type ClubPlan = 'free' | 'trial' | 'starter' | 'pro' | 'scale' | 'total';
 
 export interface ClubModules {
   jugadores?: boolean;

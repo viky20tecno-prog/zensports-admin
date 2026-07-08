@@ -26,6 +26,7 @@ export const MODULE_LABELS: Record<ModuleKey, string> = {
 
 // Modules included (unlocked) in each plan
 export const PLAN_MODULES: Record<ClubPlan, ModuleKey[]> = {
+  free:    ['jugadores'],
   trial:   ['jugadores'],
   starter: ['jugadores', 'uniformes', 'cobro'],
   pro:     ['jugadores', 'uniformes', 'cobro', 'torneos', 'arbitraje', 'whatsapp'],
