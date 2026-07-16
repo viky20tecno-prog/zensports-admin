@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { canAccess } from '@/lib/rbac';
+import { buildModulosForPlan } from '@/lib/plan-modules';
 
 function generarSlug(nombre: string) {
   return nombre
@@ -59,16 +60,16 @@ export async function POST(request: Request) {
     config: {
       nombre: nombre_club.trim(),
       ciudad: ciudad?.trim() || '',
-      valor_mensualidad: 65000,
+      // 0, no un default fijo — un club nuevo configura su propia cuota real
+      // (ver lección del 8 jul: un valor "por defecto" se pisaba en silencio
+      // sobre clubes que sí querían $0 explícito).
+      valor_mensualidad: 0,
       color: '#00AAFF',
       subtitulo: '',
       codigo_pais: '57',
       plan: 'trial',
       trial_ends_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-      modulos: {
-        dashboard: true, jugadores: true, uniformes: true,
-        arbitraje: true, cobro: true, whatsapp: true, conciliacion: true,
-      },
+      modulos: buildModulosForPlan('trial'),
     },
   });
 
