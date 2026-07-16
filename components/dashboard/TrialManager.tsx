@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Clock, XCircle, CheckCircle2, AlertTriangle, MessageCircle, ExternalLink } from 'lucide-react';
 
@@ -10,6 +10,7 @@ export interface TrialClub {
   trial_ends_at: string | null;
   days_left: number | null;
   created_at: string;
+  contactado: boolean;
 }
 
 interface Props {
@@ -24,22 +25,40 @@ export function TrialManager({ inProgress, expiringSoon, expired }: Props) {
   const [tab, setTab] = useState<'expiring' | 'active' | 'expired'>(
     expiringSoon.length > 0 ? 'expiring' : 'active'
   );
-  const [contacted, setContacted] = useState<Set<string>>(new Set());
+  // Persistido en config.trial_contacted de cada club (antes vivía solo en
+  // localStorage — invisible para cualquier colega que abriera el panel desde
+  // otro navegador o dispositivo). Arranca desde lo que ya trae el server;
+  // el toggle actualiza optimista en memoria y confirma contra el servidor.
+  const [contacted, setContacted] = useState<Set<string>>(
+    () => new Set([...inProgress, ...expiringSoon, ...expired].filter(c => c.contactado).map(c => c.slug))
+  );
+  const [saving, setSaving] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('zs_contacted_trials');
-      if (saved) setContacted(new Set(JSON.parse(saved) as string[]));
-    } catch { /* ignore */ }
-  }, []);
-
-  const toggleContacted = (slug: string) => {
+  const toggleContacted = async (slug: string) => {
+    const next = !contacted.has(slug);
     setContacted(prev => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug); else next.add(slug);
-      try { localStorage.setItem('zs_contacted_trials', JSON.stringify(Array.from(next))); } catch { /* ignore */ }
-      return next;
+      const s = new Set(prev);
+      if (next) s.add(slug); else s.delete(slug);
+      return s;
     });
+    setSaving(slug);
+    try {
+      const res = await fetch(`/api/clubs/${slug}/config`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trial_contacted: next }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // revertir si falló
+      setContacted(prev => {
+        const s = new Set(prev);
+        if (next) s.delete(slug); else s.add(slug);
+        return s;
+      });
+    } finally {
+      setSaving(null);
+    }
   };
 
   const tabs = [
@@ -182,8 +201,9 @@ export function TrialManager({ inProgress, expiringSoon, expired }: Props) {
                   </Link>
                   <button
                     onClick={() => toggleContacted(club.slug)}
+                    disabled={saving === club.slug}
                     title={isContacted ? 'Quitar marca contactado' : 'Marcar como contactado'}
-                    className={`p-1.5 rounded-lg transition-colors ${
+                    className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${
                       isContacted
                         ? 'text-green-400 bg-green-500/10'
                         : 'text-gray-600 hover:text-green-400 hover:bg-green-500/10'

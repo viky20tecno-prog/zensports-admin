@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/supabase-admin';
 import { signAdminToken, COOKIE_NAME } from '@/lib/auth';
 import { writeAuditLog } from '@/lib/audit';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const schema = z.object({
   email: z.string().email(),
@@ -13,6 +14,11 @@ const schema = z.object({
 const TTL = 4 * 60 * 60; // 4 hours
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  if (!checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Espera unos minutos e intenta de nuevo.' }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

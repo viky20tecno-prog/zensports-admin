@@ -68,7 +68,7 @@ export function OverviewTab({ detail, role }: Props) {
     setStaffLoading(false);
   }
 
-  async function toggleModule(key: ModuleKey, next: boolean) {
+  async function toggleModule(key: ModuleKey | 'whatsapp', next: boolean) {
     setToggling(key);
     setModulos(prev => ({ ...prev, [key]: next }));
     const res = await fetch(`/api/clubs/${detail.slug}/modules`, {
@@ -205,6 +205,31 @@ export function OverviewTab({ detail, role }: Props) {
             );
           })}
         </ul>
+      </section>
+
+      {/* Bot de WhatsApp — interruptor operativo, no es una feature de plan (todo
+          plan incluye el bot); wa-agent.js lee config.modulos.whatsapp para decidir
+          si responde para este club o no. Separado de "Módulos" a propósito. */}
+      <section className="rounded-xl border border-white/8 bg-white/2 p-4 space-y-3">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Bot de WhatsApp (Zen)</h3>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-gray-300">
+            {modulos.whatsapp !== false ? 'Respondiendo para este club' : 'Apagado para este club'}
+          </span>
+          <button
+            onClick={() => toggleModule('whatsapp', modulos.whatsapp === false)}
+            disabled={toggling === 'whatsapp'}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
+              modulos.whatsapp !== false ? 'bg-indigo-600' : 'bg-white/10'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                modulos.whatsapp !== false ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
       </section>
 
       {/* Health */}

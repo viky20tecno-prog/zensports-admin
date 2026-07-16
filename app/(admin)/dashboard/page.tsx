@@ -81,6 +81,7 @@ async function getDashboardData() {
         trial_ends_at: trialEndsAt || null,
         days_left:     daysLeft !== null ? Math.max(0, daysLeft) : null,
         created_at:    createdAt,
+        contactado:    club.config?.trial_contacted === true,
       });
 
     } else if (status === 'expired') {
@@ -126,6 +127,7 @@ async function getDashboardData() {
         trial_ends_at: trialEndsAt || null,
         days_left:     null,
         created_at:    c.created_at as string,
+        contactado:    c.config?.trial_contacted === true,
       };
     });
 

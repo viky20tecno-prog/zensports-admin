@@ -27,7 +27,10 @@ export function EditClubConfigDialog({ club, open, onClose, onSuccess }: Props) 
   const [logoUrl,   setLogoUrl]   = useState(cfg.logo_url    || '');
   const [whatsapp,    setWhatsapp]    = useState(cfg.whatsapp     || '');
   const [wahaSession, setWahaSession] = useState(cfg.waha_session || '');
-  const [mensualidad, setMensualidad] = useState(String(cfg.valor_mensualidad || ''));
+  // ?? y no || — con || un club en $0 mensualidad (0 || '' === '') arrancaba
+  // el input vacío, y al guardar (aunque el admin solo tocara otro campo)
+  // mandaba valor_mensualidad: null, corrompiendo el 0 real del club.
+  const [mensualidad, setMensualidad] = useState(String(cfg.valor_mensualidad ?? ''));
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');

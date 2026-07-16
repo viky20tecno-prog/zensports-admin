@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
+import { canAccess } from '@/lib/rbac';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
@@ -46,9 +47,9 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
       <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:28px;margin-bottom:24px;">
         <p style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 16px;">Planes disponibles</p>
         ${[
-          { plan: 'Starter', precio: '$149.000 COP/mes', desc: 'Dashboard + Cobro WA + Carnet digital' },
-          { plan: 'Pro',     precio: '$399.000 COP/mes', desc: 'Todo Starter + Torneos + Arbitraje + Finanzas' },
-          { plan: 'Scale',   precio: '$799.000 COP/mes', desc: 'Todo incluido + múltiples admins + soporte prioritario' },
+          { plan: 'Starter', precio: '$149.000 COP/mes', desc: 'Dashboard + Calendario + Recordatorios de cobro' },
+          { plan: 'Pro',     precio: '$399.000 COP/mes', desc: 'Todo Starter + Uniformes + Torneos + Finanzas' },
+          { plan: 'Scale',   precio: '$799.000 COP/mes', desc: 'Todo incluido + Conciliación bancaria + soporte prioritario' },
         ].map(p => `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
           <div>
@@ -81,6 +82,7 @@ export async function POST(
 ) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'extend_trial')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { slug } = await params;
 

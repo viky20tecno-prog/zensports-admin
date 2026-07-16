@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
+import { canAccess } from '@/lib/rbac';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
@@ -9,6 +10,7 @@ const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
 export async function POST(req: Request) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canAccess(session.role, 'extend_trial')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { action, slugs } = await req.json();
   if (!action || !Array.isArray(slugs) || slugs.length === 0) {
