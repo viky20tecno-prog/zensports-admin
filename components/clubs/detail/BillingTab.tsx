@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Plus, X, TrendingUp } from 'lucide-react';
+import { Plus, X, TrendingUp, Pencil, Trash2, Check } from 'lucide-react';
 import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
 import type { BillingRecord, ClubFullDetail } from '@/types/club';
 
@@ -65,6 +65,57 @@ export function BillingTab({ detail, initialRecords }: Props) {
     } else {
       const json = await res.json().catch(() => ({}));
       setError(json.error || 'Error al guardar');
+    }
+  }
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ monto: '', periodo: '', metodo: '', referencia: '', notas: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  function startEdit(r: BillingRecord) {
+    setEditingId(r.id);
+    setEditError('');
+    setEditForm({
+      monto: String(r.monto),
+      periodo: r.periodo,
+      metodo: r.metodo,
+      referencia: r.referencia || '',
+      notas: r.notas || '',
+    });
+  }
+
+  async function saveEdit(id: string) {
+    if (!editForm.monto || !editForm.periodo) { setEditError('Monto y período son requeridos'); return; }
+    setEditSaving(true);
+    setEditError('');
+    const res = await fetch(`/api/clubs/${detail.slug}/billing/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...editForm, monto: Number(editForm.monto) }),
+    });
+    setEditSaving(false);
+    if (res.ok) {
+      const { record } = await res.json();
+      setRecords(prev => prev.map(r => r.id === id ? record : r));
+      setEditingId(null);
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setEditError(json.error || 'Error al guardar');
+    }
+  }
+
+  async function handleDelete(r: BillingRecord) {
+    if (!window.confirm(`¿Borrar el pago de ${formatCOP(r.monto)} (${formatPeriodo(r.periodo)})? Esta acción no se puede deshacer.`)) return;
+    setDeletingId(r.id);
+    const res = await fetch(`/api/clubs/${detail.slug}/billing/${r.id}`, { method: 'DELETE' });
+    setDeletingId(null);
+    if (res.ok) {
+      setRecords(prev => prev.filter(x => x.id !== r.id));
+    } else {
+      const json = await res.json().catch(() => ({}));
+      alert(json.error || 'Error al borrar');
     }
   }
 
@@ -181,21 +232,71 @@ export function BillingTab({ detail, initialRecords }: Props) {
           <table className="w-full text-sm">
             <thead className="bg-white/3 border-b border-white/8">
               <tr>
-                {['Período', 'Monto', 'Método', 'Referencia', 'Registrado por', 'Fecha'].map(h => (
+                {['Período', 'Monto', 'Método', 'Referencia', 'Registrado por', 'Fecha', ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {records.map(r => (
-                <tr key={r.id} className="hover:bg-white/3 transition-colors">
-                  <td className="px-4 py-3 text-gray-200 font-medium">{formatPeriodo(r.periodo)}</td>
-                  <td className="px-4 py-3 text-white font-bold">{formatCOP(r.monto)}</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs capitalize">{r.metodo}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs font-mono">{r.referencia || '—'}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
-                </tr>
+                editingId === r.id ? (
+                  <tr key={r.id} className="bg-indigo-500/5">
+                    <td className="px-4 py-2">
+                      <input type="month" value={editForm.periodo} onChange={e => setEditForm(f => ({ ...f, periodo: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500/50" />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input type="number" value={editForm.monto} onChange={e => setEditForm(f => ({ ...f, monto: e.target.value }))}
+                        className="w-24 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500/50" />
+                    </td>
+                    <td className="px-4 py-2">
+                      <select value={editForm.metodo} onChange={e => setEditForm(f => ({ ...f, metodo: e.target.value }))}
+                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500/50">
+                        {METODOS.map(m => <option key={m} value={m} className="bg-[#0F1219]">{m}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-4 py-2">
+                      <input type="text" value={editForm.referencia} onChange={e => setEditForm(f => ({ ...f, referencia: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500/50" />
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => saveEdit(r.id)} disabled={editSaving} title="Guardar"
+                          className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/10 transition-colors disabled:opacity-50">
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => setEditingId(null)} title="Cancelar"
+                          className="p-1.5 rounded-lg text-gray-500 hover:bg-white/5 transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {editError && <p className="text-red-400 text-[10px] mt-1">{editError}</p>}
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={r.id} className="hover:bg-white/3 transition-colors">
+                    <td className="px-4 py-3 text-gray-200 font-medium">{formatPeriodo(r.periodo)}</td>
+                    <td className="px-4 py-3 text-white font-bold">{formatCOP(r.monto)}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs capitalize">{r.metodo}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs font-mono">{r.referencia || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => startEdit(r)} title="Editar"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDelete(r)} disabled={deletingId === r.id} title="Borrar"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
               ))}
             </tbody>
           </table>
