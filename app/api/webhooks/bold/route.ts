@@ -14,14 +14,8 @@ export async function POST(req: NextRequest) {
 
   const rawBody = await req.text();
   const signature = req.headers.get('x-bold-signature');
-  const sigValida = verificarFirmaBold(rawBody, signature);
 
-  // DEBUG temporal (17 jul) — quitar una vez confirmado el flujo end-to-end con Bold.
-  console.log('[webhook/bold][debug] headers:', JSON.stringify(Object.fromEntries(req.headers)));
-  console.log('[webhook/bold][debug] sigPresente:', !!signature, 'sigValida:', sigValida, 'bodyLen:', rawBody.length);
-  console.log('[webhook/bold][debug] body:', rawBody.slice(0, 2000));
-
-  if (!sigValida) {
+  if (!verificarFirmaBold(rawBody, signature)) {
     return NextResponse.json({ error: 'Firma inválida' }, { status: 401 });
   }
 
@@ -33,7 +27,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type !== 'SALE_APPROVED') {
-    console.log('[webhook/bold][debug] evento ignorado, type:', event.type);
     return NextResponse.json({ status: 'ignored' }, { status: 200 });
   }
 
@@ -43,14 +36,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: 'ignored' }, { status: 200 });
   }
 
-  const { data, error } = await adminDb
+  const { error } = await adminDb
     .from('admin_billing')
     .update({ estado: 'pagado' })
     .eq('bold_reference', reference)
-    .neq('estado', 'pagado')
-    .select('id');
-
-  console.log('[webhook/bold][debug] reference:', reference, 'filas actualizadas:', data?.length ?? 0);
+    .neq('estado', 'pagado');
 
   if (error) {
     console.error('[webhook/bold] error actualizando admin_billing:', error.message);
