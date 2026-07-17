@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { adminDb } from '@/lib/supabase-admin';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const schema = z.object({
   token:    z.string().min(1),
@@ -9,6 +10,11 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  if (!checkRateLimit(`reset-password:${ip}`, 5, 60 * 1000)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Espera un minuto e intenta de nuevo.' }, { status: 429 });
+  }
+
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
 

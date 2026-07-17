@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { adminDb } from '@/lib/supabase-admin';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  if (!checkRateLimit(`forgot-password:${ip}`, 5, 60 * 1000)) {
+    return NextResponse.json({ error: 'Demasiados intentos. Espera un minuto e intenta de nuevo.' }, { status: 429 });
+  }
+
   try {
     let body: { email?: string };
     try { body = await req.json(); } catch { return NextResponse.json({ ok: true }); }
