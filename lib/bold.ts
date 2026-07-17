@@ -54,21 +54,36 @@ export function referenciaBold(clubSlug: string, periodo: string): string {
   return `zs${slugAlnum}${periodoAlnum}${Date.now()}`.slice(0, 60);
 }
 
+function hmacHex(encodedBody: string, key: string): Buffer {
+  return Buffer.from(crypto.createHmac('sha256', key).update(encodedBody).digest('hex'), 'hex');
+}
+
+function constantTimeEquals(hexA: Buffer, hexB: string): boolean {
+  const b = Buffer.from(hexB, 'hex');
+  if (hexA.length !== b.length) return false;
+  return crypto.timingSafeEqual(hexA, b);
+}
+
 /**
- * Verifica la firma de un webhook de Bold: HMAC-SHA256(base64(body), secret_key)
+ * Verifica la firma de un webhook de Bold: HMAC-SHA256(base64(body), llave)
  * comparado contra el header x-bold-signature. Fail-closed: sin BOLD_SECRET_KEY
  * configurada, ningún webhook pasa (mismo criterio aplicado a Meta/Twilio/WAHA
  * tras la auditoría del 16 jul — nunca aceptar todo por defecto).
+ *
+ * Confirmado empíricamente el 17 jul contra un webhook de prueba real de Bold:
+ * en ambiente de PRUEBAS, Bold firma con string vacío como llave, no con la
+ * Secret Key real (documentado por Bold como "en pruebas: string vacío", algo
+ * fácil de leer mal a la primera). Se prueban ambas variantes — la real
+ * BOLD_SECRET_KEY (para cuando se agreguen llaves de producción) y el string
+ * vacío (para el ambiente de pruebas actual) — y basta con que una calce.
  */
 export function verificarFirmaBold(rawBody: string, signatureHeader: string | null): boolean {
   const secretKey = process.env.BOLD_SECRET_KEY;
   if (!secretKey || !signatureHeader) return false;
 
   const encoded = Buffer.from(rawBody).toString('base64');
-  const expected = crypto.createHmac('sha256', secretKey).update(encoded).digest('hex');
 
-  const a = Buffer.from(expected, 'hex');
-  const b = Buffer.from(signatureHeader, 'hex');
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  if (constantTimeEquals(hmacHex(encoded, secretKey), signatureHeader)) return true;
+  if (constantTimeEquals(hmacHex(encoded, ''), signatureHeader)) return true;
+  return false;
 }
