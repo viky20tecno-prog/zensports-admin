@@ -64,6 +64,7 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   await writeAuditLog({
+    admin_id: session.id,
     admin_email: session.email,
     action: 'BILLING_RECORDED',
     entity_type: 'club',
