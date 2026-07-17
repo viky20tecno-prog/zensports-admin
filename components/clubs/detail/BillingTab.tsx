@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Plus, X, TrendingUp, Pencil, Trash2, Check } from 'lucide-react';
+import { Plus, X, TrendingUp, Pencil, Trash2, Check, Link2, Copy, CircleDollarSign } from 'lucide-react';
 import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
 import type { BillingRecord, ClubFullDetail } from '@/types/club';
 
@@ -29,11 +29,11 @@ export function BillingTab({ detail, initialRecords }: Props) {
   const [error, setError] = useState('');
 
   const planPrice = PLAN_PRICE[detail.config.plan] ?? 0;
-  const totalCollected = records.reduce((s, r) => s + r.monto, 0);
+  const totalCollected = records.filter(r => r.estado === 'pagado').reduce((s, r) => s + r.monto, 0);
 
   const now = new Date();
   const currentPeriodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const paidThisMonth = records.some(r => r.periodo === currentPeriodo);
+  const paidThisMonth = records.some(r => r.periodo === currentPeriodo && r.estado === 'pagado');
 
   const [form, setForm] = useState({
     monto: planPrice > 0 ? String(planPrice) : '',
@@ -65,6 +65,38 @@ export function BillingTab({ detail, initialRecords }: Props) {
     } else {
       const json = await res.json().catch(() => ({}));
       setError(json.error || 'Error al guardar');
+    }
+  }
+
+  const [showBoldForm, setShowBoldForm] = useState(false);
+  const [boldPeriodo, setBoldPeriodo] = useState(currentPeriodo);
+  const [boldGenerating, setBoldGenerating] = useState(false);
+  const [boldError, setBoldError] = useState('');
+  const [boldResult, setBoldResult] = useState<BillingRecord | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  function copyLink(url: string) {
+    navigator.clipboard.writeText(url);
+    setCopied(url);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  async function handleGenerarLinkBold() {
+    setBoldGenerating(true);
+    setBoldError('');
+    const res = await fetch(`/api/clubs/${detail.slug}/billing/bold-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ periodo: boldPeriodo }),
+    });
+    setBoldGenerating(false);
+    if (res.ok) {
+      const { record } = await res.json();
+      setRecords(prev => [record, ...prev]);
+      setBoldResult(record);
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setBoldError(json.error || 'Error generando el link');
     }
   }
 
@@ -147,14 +179,66 @@ export function BillingTab({ detail, initialRecords }: Props) {
         <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Historial de suscripción
         </h3>
-        <button
-          onClick={() => setShowForm(v => !v)}
-          className="flex items-center gap-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors"
-        >
-          {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-          {showForm ? 'Cancelar' : 'Registrar pago'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setShowBoldForm(v => !v); setBoldResult(null); setBoldError(''); }}
+            className="flex items-center gap-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {showBoldForm ? <X className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+            {showBoldForm ? 'Cancelar' : 'Generar link Bold'}
+          </button>
+          <button
+            onClick={() => setShowForm(v => !v)}
+            className="flex items-center gap-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            {showForm ? 'Cancelar' : 'Registrar pago'}
+          </button>
+        </div>
       </div>
+
+      {/* Generador de link Bold */}
+      {showBoldForm && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3">
+          <p className="text-xs font-medium text-emerald-400 uppercase tracking-wider">Generar link de pago Bold</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Período</label>
+              <input
+                type="month"
+                value={boldPeriodo}
+                onChange={e => setBoldPeriodo(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Monto (según plan {detail.config.plan})</label>
+              <p className="px-3 py-2 text-sm text-gray-300">{formatCOP(planPrice)}</p>
+            </div>
+          </div>
+          {boldError && <p className="text-red-400 text-xs">{boldError}</p>}
+          {boldResult ? (
+            <div className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2">
+              <CircleDollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-xs text-gray-300 truncate flex-1">{boldResult.bold_link_url}</span>
+              <button
+                onClick={() => copyLink(boldResult.bold_link_url!)}
+                className="flex items-center gap-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 shrink-0"
+              >
+                <Copy className="w-3.5 h-3.5" /> {copied === boldResult.bold_link_url ? 'Copiado' : 'Copiar'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerarLinkBold}
+              disabled={boldGenerating}
+              className="w-full py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors disabled:opacity-50"
+            >
+              {boldGenerating ? 'Generando…' : 'Generar link'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Form */}
       {showForm && (
@@ -232,7 +316,7 @@ export function BillingTab({ detail, initialRecords }: Props) {
           <table className="w-full text-sm">
             <thead className="bg-white/3 border-b border-white/8">
               <tr>
-                {['Período', 'Monto', 'Método', 'Referencia', 'Registrado por', 'Fecha', ''].map(h => (
+                {['Período', 'Monto', 'Método', 'Estado', 'Referencia', 'Registrado por', 'Fecha', ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
@@ -259,6 +343,7 @@ export function BillingTab({ detail, initialRecords }: Props) {
                       <input type="text" value={editForm.referencia} onChange={e => setEditForm(f => ({ ...f, referencia: e.target.value }))}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500/50" />
                     </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">—</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
                     <td className="px-4 py-2">
@@ -280,11 +365,24 @@ export function BillingTab({ detail, initialRecords }: Props) {
                     <td className="px-4 py-3 text-gray-200 font-medium">{formatPeriodo(r.periodo)}</td>
                     <td className="px-4 py-3 text-white font-bold">{formatCOP(r.monto)}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs capitalize">{r.metodo}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        r.estado === 'pagado' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'
+                      }`}>
+                        {r.estado === 'pagado' ? 'Pagado' : 'Pendiente'}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-gray-600 text-xs font-mono">{r.referencia || '—'}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{r.recorded_by}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(r.created_at)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
+                        {r.metodo === 'bold' && r.estado === 'pendiente' && r.bold_link_url && (
+                          <button onClick={() => copyLink(r.bold_link_url!)} title="Copiar link de pago"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button onClick={() => startEdit(r)} title="Editar"
                           className="p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
                           <Pencil className="w-3.5 h-3.5" />

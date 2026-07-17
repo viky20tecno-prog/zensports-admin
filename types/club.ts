@@ -110,6 +110,10 @@ export interface BillingRecord {
   notas?: string | null;
   recorded_by: string;
   created_at: string;
+  estado: 'pendiente' | 'pagado';
+  bold_link_id?: string | null;
+  bold_link_url?: string | null;
+  bold_reference?: string | null;
 }
 
 export interface ActivityLog {

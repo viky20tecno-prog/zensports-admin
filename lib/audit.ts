@@ -20,6 +20,7 @@ export type AuditAction =
   | 'BILLING_RECORDED'
   | 'BILLING_EDITED'
   | 'BILLING_DELETED'
+  | 'BOLD_LINK_CREATED'
   | 'IMPERSONATE'
   | 'STAFF_ADDED'
   | 'STAFF_REMOVED'
