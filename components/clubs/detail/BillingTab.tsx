@@ -71,6 +71,8 @@ export function BillingTab({ detail, initialRecords }: Props) {
   const [showBoldForm, setShowBoldForm] = useState(false);
   const [boldPeriodo, setBoldPeriodo] = useState(currentPeriodo);
   const [boldMontoOverride, setBoldMontoOverride] = useState('');
+  const [boldActivarPlan, setBoldActivarPlan] = useState(false);
+  const [boldPlanSolicitado, setBoldPlanSolicitado] = useState('starter');
   const [boldGenerating, setBoldGenerating] = useState(false);
   const [boldError, setBoldError] = useState('');
   const [boldResult, setBoldResult] = useState<BillingRecord | null>(null);
@@ -85,8 +87,9 @@ export function BillingTab({ detail, initialRecords }: Props) {
   async function handleGenerarLinkBold() {
     setBoldGenerating(true);
     setBoldError('');
-    const body: { periodo: string; monto?: number } = { periodo: boldPeriodo };
+    const body: { periodo: string; monto?: number; plan_solicitado?: string } = { periodo: boldPeriodo };
     if (boldMontoOverride) body.monto = Number(boldMontoOverride);
+    if (boldActivarPlan) body.plan_solicitado = boldPlanSolicitado;
     const res = await fetch(`/api/clubs/${detail.slug}/billing/bold-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -225,6 +228,19 @@ export function BillingTab({ detail, initialRecords }: Props) {
               />
             </div>
           </div>
+          <label className="flex items-center gap-2 text-xs text-gray-400">
+            <input type="checkbox" checked={boldActivarPlan} onChange={e => setBoldActivarPlan(e.target.checked)} />
+            Activar plan automáticamente al confirmarse el pago
+          </label>
+          {boldActivarPlan && (
+            <select
+              value={boldPlanSolicitado}
+              onChange={e => setBoldPlanSolicitado(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500/50"
+            >
+              {['starter', 'pro', 'scale'].map(p => <option key={p} value={p} className="bg-[#0F1219]">{p}</option>)}
+            </select>
+          )}
           {boldError && <p className="text-red-400 text-xs">{boldError}</p>}
           {boldResult ? (
             <div className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2">

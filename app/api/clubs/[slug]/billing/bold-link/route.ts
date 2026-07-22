@@ -25,6 +25,14 @@ export async function POST(
   const monto = Number(body.monto) || PLAN_PRICE[club.config?.plan] || 0;
   if (monto <= 0) return NextResponse.json({ error: 'Monto inválido' }, { status: 400 });
 
+  // Opcional: si el admin quiere que el plan se active solo al confirmarse el
+  // pago (mismo mecanismo que el autoservicio del club, ver
+  // /api/public/clubs/[slug]/billing/bold-link) — útil para probar ese
+  // webhook sin depender del precio fijo del endpoint de autoservicio, o para
+  // activar un plan al mismo tiempo que se registra el cobro manual.
+  const PLANES_VALIDOS = ['free', 'trial', 'starter', 'pro', 'scale', 'total'];
+  const planSolicitado = PLANES_VALIDOS.includes(body.plan_solicitado) ? body.plan_solicitado : null;
+
   const reference = referenciaBold(slug, periodo);
   const clubNombre = club.config?.nombre || slug;
 
@@ -52,6 +60,7 @@ export async function POST(
       bold_link_url: link.url,
       bold_reference: reference,
       recorded_by: session.email,
+      plan_solicitado: planSolicitado,
     })
     .select()
     .single();
