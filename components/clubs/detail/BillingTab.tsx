@@ -70,6 +70,7 @@ export function BillingTab({ detail, initialRecords }: Props) {
 
   const [showBoldForm, setShowBoldForm] = useState(false);
   const [boldPeriodo, setBoldPeriodo] = useState(currentPeriodo);
+  const [boldMontoOverride, setBoldMontoOverride] = useState('');
   const [boldGenerating, setBoldGenerating] = useState(false);
   const [boldError, setBoldError] = useState('');
   const [boldResult, setBoldResult] = useState<BillingRecord | null>(null);
@@ -84,10 +85,12 @@ export function BillingTab({ detail, initialRecords }: Props) {
   async function handleGenerarLinkBold() {
     setBoldGenerating(true);
     setBoldError('');
+    const body: { periodo: string; monto?: number } = { periodo: boldPeriodo };
+    if (boldMontoOverride) body.monto = Number(boldMontoOverride);
     const res = await fetch(`/api/clubs/${detail.slug}/billing/bold-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ periodo: boldPeriodo }),
+      body: JSON.stringify(body),
     });
     setBoldGenerating(false);
     if (res.ok) {
@@ -212,8 +215,14 @@ export function BillingTab({ detail, initialRecords }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Monto (según plan {detail.config.plan})</label>
-              <p className="px-3 py-2 text-sm text-gray-300">{formatCOP(planPrice)}</p>
+              <label className="block text-xs text-gray-500 mb-1">Monto (plan {detail.config.plan}: {formatCOP(planPrice)})</label>
+              <input
+                type="number"
+                value={boldMontoOverride}
+                onChange={e => setBoldMontoOverride(e.target.value)}
+                placeholder={String(planPrice)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-emerald-500/50"
+              />
             </div>
           </div>
           {boldError && <p className="text-red-400 text-xs">{boldError}</p>}
