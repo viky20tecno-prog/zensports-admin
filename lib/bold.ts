@@ -54,6 +54,19 @@ export function referenciaBold(clubSlug: string, periodo: string): string {
   return `zs${slugAlnum}${periodoAlnum}${Date.now()}`.slice(0, 60);
 }
 
+/**
+ * Referencia única para un cobro de membresía de un Afiliado (patrocinador/
+ * anunciante — no un club). Mismo mecanismo que referenciaBold, pero con
+ * prefijo "zsafil" + el id del afiliado en vez del slug del club, para que
+ * sea legible como "es un cobro de afiliados" al mirar el dashboard de Bold
+ * y no se confunda con un cobro de suscripción de club.
+ */
+export function referenciaAfiliadoBold(afiliadoId: string, periodo: string): string {
+  const idAlnum = afiliadoId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+  const periodoAlnum = periodo.replace(/[^a-zA-Z0-9]/g, '');
+  return `zsafil${idAlnum}${periodoAlnum}${Date.now()}`.slice(0, 60);
+}
+
 function hmacHex(encodedBody: string, key: string): Buffer {
   return Buffer.from(crypto.createHmac('sha256', key).update(encodedBody).digest('hex'), 'hex');
 }

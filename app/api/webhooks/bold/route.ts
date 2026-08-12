@@ -68,5 +68,49 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Si el reference no matcheó ninguna fila de admin_billing (cobro de club),
+  // puede ser un cobro de Afiliados (patrocinadores/anunciantes) — reference
+  // con prefijo "zsafil" generado por referenciaAfiliadoBold. Mismo criterio
+  // idempotente .neq('estado','pagado') que arriba.
+  if (!row) {
+    const { data: afiliadoBillingRows, error: afError } = await adminDb
+      .from('afiliados_billing')
+      .update({ estado: 'pagado' })
+      .eq('bold_reference', reference)
+      .neq('estado', 'pagado')
+      .select('afiliado_id');
+
+    if (afError) {
+      console.error('[webhook/bold] error actualizando afiliados_billing:', afError.message);
+    }
+
+    const afiliadoId = afiliadoBillingRows?.[0]?.afiliado_id;
+    if (afiliadoId) {
+      const { data: afiliado } = await adminDb
+        .from('afiliados')
+        .select('fecha_vencimiento')
+        .eq('id', afiliadoId)
+        .maybeSingle();
+
+      const hoy = new Date();
+      const vencimientoActual = afiliado?.fecha_vencimiento ? new Date(afiliado.fecha_vencimiento) : null;
+      // Si todavía no vencía, la membresía se extiende desde su vencimiento
+      // actual (no se "pierde" el tiempo que ya tenía pago); si ya venció o
+      // nunca tuvo fecha, se cuenta un mes desde hoy.
+      const baseDate = vencimientoActual && vencimientoActual > hoy ? vencimientoActual : hoy;
+      const nuevaFecha = new Date(baseDate);
+      nuevaFecha.setMonth(nuevaFecha.getMonth() + 1);
+      const fecha_vencimiento = nuevaFecha.toISOString().slice(0, 10);
+
+      const { error: afUpdateError } = await adminDb
+        .from('afiliados')
+        .update({ estado: 'activo', fecha_vencimiento })
+        .eq('id', afiliadoId);
+      if (afUpdateError) {
+        console.error('[webhook/bold] error activando afiliado:', afUpdateError.message);
+      }
+    }
+  }
+
   return NextResponse.json({ status: 'ok' }, { status: 200 });
 }

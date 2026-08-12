@@ -40,3 +40,13 @@ export const PLAN_PRICE: Record<string, number> = {
   scale:   799000,
   total:   799000,
 };
+
+// Precios por defecto de los tiers de Afiliados (patrocinadores/anunciantes,
+// no clubes) — son solo el valor inicial que precarga el formulario, no un
+// límite: el precio real de cada afiliado se guarda editable en
+// afiliados.precio_mensual y puede sobreescribirse por trato individual.
+export const AFILIADO_TIER_PRICE: Record<string, number> = {
+  bronce: 99000,
+  plata:  199000,
+  oro:    349000,
+};

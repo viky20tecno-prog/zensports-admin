@@ -24,7 +24,14 @@ export type AuditAction =
   | 'IMPERSONATE'
   | 'STAFF_ADDED'
   | 'STAFF_REMOVED'
-  | 'CLUB_CONFIG_EDITED';
+  | 'CLUB_CONFIG_EDITED'
+  | 'AFILIADO_CREATED'
+  | 'AFILIADO_UPDATED'
+  | 'AFILIADO_DELETED'
+  | 'AFILIADO_BILLING_RECORDED'
+  | 'AFILIADO_BILLING_EDITED'
+  | 'AFILIADO_BILLING_DELETED'
+  | 'AFILIADO_BOLD_LINK_CREATED';
 
 interface WriteAuditLogParams {
   admin_id?: string;
@@ -32,7 +39,7 @@ interface WriteAuditLogParams {
   admin_name?: string;
   admin_role?: string;
   action: AuditAction;
-  entity_type: 'club' | 'admin_user';
+  entity_type: 'club' | 'admin_user' | 'afiliado';
   entity_id?: string;
   before_state?: Record<string, unknown> | null;
   after_state?: Record<string, unknown> | null;

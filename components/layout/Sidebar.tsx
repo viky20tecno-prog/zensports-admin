@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Building2, BarChart3, ScrollText,
-  Settings, ShieldCheck, UserPlus, X,
+  Settings, ShieldCheck, UserPlus, X, Handshake,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminRole } from '@/types/admin';
@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { label: 'Dashboard',       href: '/dashboard',      icon: LayoutDashboard, color: 'text-violet-400',  glow: 'bg-violet-500/10 border-violet-500/20' },
   { label: 'Clubes',          href: '/clubs',          icon: Building2,       color: 'text-indigo-400',  glow: 'bg-indigo-500/10 border-indigo-500/20',  permission: 'view_clubs' },
   { label: 'Leads',           href: '/leads',          icon: UserPlus,        color: 'text-emerald-400', glow: 'bg-emerald-500/10 border-emerald-500/20', permission: 'view_clubs' },
+  { label: 'Afiliados',       href: '/afiliados',      icon: Handshake,       color: 'text-pink-400',    glow: 'bg-pink-500/10 border-pink-500/20',       permission: 'manage_billing' },
   { label: 'Analytics',       href: '/analytics',      icon: BarChart3,       color: 'text-cyan-400',    glow: 'bg-cyan-500/10 border-cyan-500/20',       permission: 'view_analytics' },
   { label: 'Audit Logs',      href: '/audit-logs',     icon: ScrollText,      color: 'text-amber-400',   glow: 'bg-amber-500/10 border-amber-500/20',     permission: 'view_audit_logs' },
   { label: 'Administradores', href: '/settings/users', icon: Settings,        color: 'text-rose-400',    glow: 'bg-rose-500/10 border-rose-500/20',       permission: 'manage_admin_users' },
