@@ -39,7 +39,7 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
           Hola ${nombre_admin}, para continuar gestionando tu club sin interrupciones elige el plan que mejor se adapte a tus necesidades.
         </p>
         <a href="https://zensports.zenpra.ai/#precios"
-           style="display:inline-block;background:linear-gradient(135deg,#E14924,#E14924cc);color:#fff;font-weight:700;font-size:15px;text-decoration:none;border-radius:12px;padding:14px 28px;">
+           style="display:inline-block;background:linear-gradient(135deg,#6A00FF,#AE68FF);color:#fff;font-weight:700;font-size:15px;text-decoration:none;border-radius:12px;padding:14px 28px;">
           Ver planes y precios →
         </a>
       </div>
@@ -56,7 +56,7 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
             <span style="font-size:14px;font-weight:700;color:#fff;">${p.plan}</span>
             <span style="font-size:12px;color:rgba(255,255,255,0.35);margin-left:8px;">${p.desc}</span>
           </div>
-          <span style="font-size:13px;font-weight:700;color:#E14924;">${p.precio}</span>
+          <span style="font-size:13px;font-weight:700;color:#AE68FF;">${p.precio}</span>
         </div>`).join('')}
       </div>
 
