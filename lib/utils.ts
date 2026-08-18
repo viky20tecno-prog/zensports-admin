@@ -41,12 +41,15 @@ export const PLAN_PRICE: Record<string, number> = {
   total:   799000,
 };
 
-// Precios por defecto de los tiers de Afiliados (patrocinadores/anunciantes,
-// no clubes) — son solo el valor inicial que precarga el formulario, no un
-// límite: el precio real de cada afiliado se guarda editable en
-// afiliados.precio_mensual y puede sobreescribirse por trato individual.
+// Precios por defecto de los tiers de Afiliados — organizaciones, tiendas
+// deportivas o de servicios relacionados con el deporte que pagan por
+// aparecer ante TODOS los jugadores de los clubes en ZenSports (no clubes,
+// no tiene relación con PLAN_PRICE de arriba). Son solo el valor inicial que
+// precarga el formulario, no un límite: el precio real de cada afiliado se
+// guarda editable en afiliados.precio_mensual y puede sobreescribirse por
+// trato individual. Definido con Diego el 18 ago 2026.
 export const AFILIADO_TIER_PRICE: Record<string, number> = {
-  bronce: 99000,
-  plata:  199000,
-  oro:    349000,
+  bronce: 49900,
+  plata:  99900,
+  oro:    149900,
 };
