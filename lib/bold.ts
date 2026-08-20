@@ -57,11 +57,23 @@ export async function crearLinkPagoBold({ monto, descripcion, reference }: Creat
 /**
  * Referencia única y alfanumérica (límite documentado: 60 caracteres) para
  * identificar un cobro club→Zenpra en un período dado.
+ *
+ * El timestamp va SIEMPRE completo — es lo único que garantiza unicidad
+ * entre 2 cobros del mismo club en el mismo período (ej. reintentos tras un
+ * pago rechazado). Lo que se trunca es la parte descriptiva (slug+periodo)
+ * si hace falta espacio. Antes era al revés (se truncaba desde el final,
+ * cortando el timestamp) — con un slug o período largos eso podía repetir
+ * la misma referencia en llamadas separadas por segundos y Bold la rechaza
+ * como duplicada (encontrado el 20 ago 2026 probando la oferta anual).
  */
 export function referenciaBold(clubSlug: string, periodo: string): string {
+  const prefix = 'zs';
+  const ts = String(Date.now());
   const slugAlnum = clubSlug.replace(/[^a-zA-Z0-9]/g, '');
   const periodoAlnum = periodo.replace(/[^a-zA-Z0-9]/g, '');
-  return `zs${slugAlnum}${periodoAlnum}${Date.now()}`.slice(0, 60);
+  const budget = Math.max(0, 60 - prefix.length - ts.length);
+  const resto = `${slugAlnum}${periodoAlnum}`.slice(0, budget);
+  return `${prefix}${resto}${ts}`;
 }
 
 /**
