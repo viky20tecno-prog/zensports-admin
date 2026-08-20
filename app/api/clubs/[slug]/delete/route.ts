@@ -30,15 +30,23 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ slug
   const { slug } = await params;
 
   const { data: club, error: fetchErr } = await adminDb
-    .from('clubs').select('id, config').eq('slug', slug).single();
+    .from('clubs').select('id, owner_user_id, config').eq('slug', slug).single();
   if (fetchErr || !club) return NextResponse.json({ error: 'Club not found' }, { status: 404 });
 
   const clubId: string = club.id;
 
-  // Recopilar user_ids antes de borrar club_members
+  // Recopilar user_ids antes de borrar club_members. clubs.owner_user_id se
+  // suma aparte (con Set para no duplicar) porque el insert en club_members
+  // durante /registro es "best effort" (no bloquea la respuesta) — si falló
+  // o nunca corrió, el dueño real del club puede no tener fila ahí, y antes
+  // se quedaba huérfano en auth.users para siempre, bloqueando cualquier
+  // registro futuro con ese email (encontrado el 20 ago con el club
+  // "caimanes": 0 usuarios borrados en el log de auditoría del borrado).
   const { data: members } = await adminDb
     .from('club_members').select('user_id').eq('club_id', clubId);
-  const userIds = (members ?? []).map((m: { user_id: string }) => m.user_id).filter(Boolean);
+  const userIdsSet = new Set<string>((members ?? []).map((m: { user_id: string }) => m.user_id).filter(Boolean));
+  if (club.owner_user_id) userIdsSet.add(club.owner_user_id);
+  const userIds = Array.from(userIdsSet);
 
   // Borrar tablas hijas que tienen club_id
   for (const table of CHILD_TABLES) {
