@@ -63,7 +63,7 @@ export async function POST(
   const reference = referenciaBold(slug, periodo);
   const clubNombre = club.config?.nombre || slug;
   const descripcion = esAnual
-    ? `Suscripción ZenSports — ${clubNombre} — plan ${plan} anual (oferta de lanzamiento, 2 meses gratis)`
+    ? `Suscripción ZenSports — ${clubNombre} — plan ${plan} ANUAL (2 meses gratis)`
     : `Suscripción ZenSports — ${clubNombre} — plan ${plan} — ${periodo}`;
 
   let link;

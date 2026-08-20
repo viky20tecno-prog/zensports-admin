@@ -14,6 +14,12 @@ interface BoldLinkPayload {
   url: string;
 }
 
+// Bold rechaza (400 "at most 100 characters") cualquier descripción más
+// larga que esto — encontrado el 20 ago 2026 probando la oferta anual con
+// un nombre de club largo. Truncar acá protege a TODOS los que arman un
+// link (manual, autoservicio, afiliados), no solo al que lo descubrió.
+const DESCRIPCION_MAX = 100;
+
 /**
  * Crea un link de pago Bold (COP, monto fijo). `reference` viaja en
  * data.metadata.reference del webhook — es lo único que usamos para
@@ -22,6 +28,10 @@ interface BoldLinkPayload {
 export async function crearLinkPagoBold({ monto, descripcion, reference }: CreateLinkParams): Promise<BoldLinkPayload> {
   const identityKey = process.env.BOLD_IDENTITY_KEY;
   if (!identityKey) throw new Error('BOLD_IDENTITY_KEY no configurada');
+
+  const descripcionSegura = descripcion.length > DESCRIPCION_MAX
+    ? `${descripcion.slice(0, DESCRIPCION_MAX - 1)}…`
+    : descripcion;
 
   const res = await fetch(`${BOLD_API_BASE}/online/link/v1`, {
     method: 'POST',
@@ -33,7 +43,7 @@ export async function crearLinkPagoBold({ monto, descripcion, reference }: Creat
       amount_type: 'CLOSE',
       amount: { currency: 'COP', total_amount: monto },
       reference,
-      description: descripcion,
+      description: descripcionSegura,
     }),
   });
 
