@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/supabase-admin';
 import { getClubAdminFromToken } from '@/lib/club-auth';
 import { crearLinkPagoBold, referenciaBold } from '@/lib/bold';
-import { PLAN_PRICE } from '@/lib/utils';
+import { PLAN_PRICE, PLAN_PRICE_ANUAL } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 // Endpoint público (cross-origin desde zensports.zenpra.ai) para que el CLUB
@@ -48,21 +48,29 @@ export async function POST(
   if (!PLANES_AUTOSERVICIO.includes(plan)) {
     return NextResponse.json({ error: 'Plan inválido' }, { status: 400, headers: corsHeaders() });
   }
+  // Oferta de lanzamiento, no permanente (ver PLAN_PRICE_ANUAL): 12 meses por
+  // el precio de 10. Cualquier valor que no sea 'anual' se trata como mensual.
+  const esAnual = body.periodoTipo === 'anual';
 
   const { data: club } = await adminDb.from('clubs').select('id, config').eq('slug', slug).maybeSingle();
   if (!club) return NextResponse.json({ error: 'Club no encontrado' }, { status: 404, headers: corsHeaders() });
 
-  const monto = PLAN_PRICE[plan];
+  const monto = esAnual ? PLAN_PRICE_ANUAL[plan] : PLAN_PRICE[plan];
   const now = new Date();
-  const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const periodo = esAnual
+    ? `${now.getFullYear()}-anual-lanzamiento`
+    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const reference = referenciaBold(slug, periodo);
   const clubNombre = club.config?.nombre || slug;
+  const descripcion = esAnual
+    ? `Suscripción ZenSports — ${clubNombre} — plan ${plan} anual (oferta de lanzamiento, 2 meses gratis)`
+    : `Suscripción ZenSports — ${clubNombre} — plan ${plan} — ${periodo}`;
 
   let link;
   try {
     link = await crearLinkPagoBold({
       monto,
-      descripcion: `Suscripción ZenSports — ${clubNombre} — plan ${plan} — ${periodo}`,
+      descripcion,
       reference,
     });
   } catch (err) {
