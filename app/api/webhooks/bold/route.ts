@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       const newModulos = buildModulosForPlan(plan);
       const { error: planError } = await adminDb
         .from('clubs')
-        .update({ config: { ...club.config, plan, modulos: newModulos }, is_active: true })
+        .update({ config: { ...club.config, plan, modulos: newModulos }, is_active: true, suspended_at: null, suspended_reason: null })
         .eq('slug', row.club_slug);
       if (planError) {
         console.error('[webhook/bold] error activando plan autoservicio:', planError.message);
