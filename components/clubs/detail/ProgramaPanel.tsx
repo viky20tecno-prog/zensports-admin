@@ -16,6 +16,7 @@ type ProgramaConfig = {
   referido_por_slug?: string | null;
   meses_gratis?: number;
   referidos_premiados?: string[];
+  sin_cobro?: boolean;
 };
 
 export function ProgramaPanel({ detail, onRecord }: Props) {
@@ -52,7 +53,14 @@ export function ProgramaPanel({ detail, onRecord }: Props) {
 
   return (
     <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-4">
-      <p className="text-xs font-medium text-violet-300 uppercase tracking-wider">Plan Fundadores · Referidos · Concurso</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-medium text-violet-300 uppercase tracking-wider">Plan Fundadores · Referidos · Concurso</p>
+        <label className="flex items-center gap-2 text-xs text-amber-300">
+          <input type="checkbox" checked={!!cfg.sin_cobro} disabled={busy}
+            onChange={e => accion({ accion: 'sin_cobro', valor: e.target.checked })} />
+          Sin cobro (club de prueba o cortesía — no suma al MRR)
+        </label>
+      </div>
       {error && <p className="text-red-400 text-xs">{error}</p>}
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -68,7 +76,7 @@ export function ProgramaPanel({ detail, onRecord }: Props) {
           ) : (
             <>
               <p className="text-xs text-gray-500">Cupos usados: {info ? `${info.fundadores_usados} de ${info.cupos}` : '…'}. Se asigna solo al pagar el anual.</p>
-              <button disabled={busy || (info ? info.fundadores_usados >= info.cupos : true)}
+              <button disabled={busy || !!cfg.sin_cobro || (info ? info.fundadores_usados >= info.cupos : true)}
                 onClick={() => accion({ accion: 'asignar_fundador' }, '¿Asignar el siguiente cupo de fundador a este club?')}
                 className="text-xs font-medium text-violet-300 hover:text-violet-200 disabled:opacity-40">Asignar cupo manualmente</button>
             </>

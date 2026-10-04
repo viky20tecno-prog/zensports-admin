@@ -47,6 +47,13 @@ export const PLAN_PRICE: Record<string, number> = {
 // — no se muestra ningún % públicamente, solo "2 meses gratis". Cuando la
 // oferta termine, basta con dejar de mostrar la opción anual en la UI; este
 // precio puede quedar sin uso sin romper nada.
+// Lo que el club aporta al MRR: 0 si ZenSports lo marcó "sin cobro" (club de
+// prueba propio o cortesía usando un plan pago sin pagarlo).
+export function mrrDeClub(config: { plan?: string; sin_cobro?: boolean } | null | undefined): number {
+  if (!config || config.sin_cobro) return 0;
+  return PLAN_PRICE[config.plan || 'trial'] || 0;
+}
+
 export const PLAN_PRICE_ANUAL: Record<string, number> = {
   starter: 1490000,
   pro:     3990000,

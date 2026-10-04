@@ -9,6 +9,7 @@ import { adminDb } from '@/lib/supabase-admin';
 //   referido_por_slug:   club real que refirió (lo enlaza ZenSports desde el admin)
 //   meses_gratis:        crédito del club que refirió, máx. MAX_MESES_GRATIS
 //   referidos_premiados: slugs ya premiados, para no dar dos veces el mismo mes
+//   sin_cobro:           club de prueba o cortesía — no ocupa cupo de fundador ni suma al MRR
 // Estos campos los bloquea PATCH /api/config del api: el club no puede tocarlos.
 export const CUPOS_FUNDADORES = 20;
 export const MAX_MESES_GRATIS = 12;
@@ -31,6 +32,7 @@ export async function asignarFundador(slug: string): Promise<number | null> {
   const { data: club } = await adminDb.from('clubs').select('config').eq('slug', slug).maybeSingle();
   if (!club) throw new Error('Club no encontrado');
   if (club.config?.fundador?.numero) return club.config.fundador.numero;
+  if (club.config?.sin_cobro) return null;
   const { total, siguiente } = await contarFundadores();
   if (total >= CUPOS_FUNDADORES || siguiente > CUPOS_FUNDADORES) return null;
   await guardarConfig(slug, { ...club.config, fundador: { numero: siguiente, desde: new Date().toISOString() }, concurso: true });

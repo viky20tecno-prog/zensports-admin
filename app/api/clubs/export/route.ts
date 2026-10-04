@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
-import { PLAN_PRICE } from '@/lib/utils';
+import { mrrDeClub } from '@/lib/utils';
 import { getClubStatus, getTrialDaysLeft } from '@/lib/health-score';
 import { canAccess } from '@/lib/rbac';
 
@@ -41,7 +41,7 @@ export async function GET() {
   const rows = (clubs || []).map(club => {
     const status  = getClubStatus(club as never);
     const plan    = club.config?.plan || 'trial';
-    const mrr     = (PLAN_PRICE as Record<string, number>)[plan] || 0;
+    const mrr     = mrrDeClub(club.config);
     const counts  = playersByClub[club.id] ?? { total: 0, active: 0 };
     const daysLeft = getTrialDaysLeft(club.config?.trial_ends_at);
     return [

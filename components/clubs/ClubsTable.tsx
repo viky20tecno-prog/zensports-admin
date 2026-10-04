@@ -169,7 +169,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
         return (
           <div>
             <span className="text-sm text-gray-200 capitalize">{plan}</span>
-            {price > 0 && <span className="text-xs text-gray-500 ml-1">{formatCOP(price)}</span>}
+            {row.original.config.sin_cobro
+              ? <span className="ml-1.5 text-[10px] font-semibold text-amber-300 bg-amber-400/10 border border-amber-400/20 rounded-full px-1.5 py-0.5">Sin cobro</span>
+              : price > 0 && <span className="text-xs text-gray-500 ml-1">{formatCOP(price)}</span>}
           </div>
         );
       },
@@ -253,6 +255,9 @@ export function ClubsTable({ initialClubs, role }: Props) {
         const { status, config, trial_days_left } = row.original;
         const plan = config.plan;
         const price = PLAN_PRICE[plan];
+        if (config.sin_cobro) {
+          return <span className="text-xs text-amber-300/80">Sin cobro · prueba/cortesía</span>;
+        }
         if (status === 'active' && price > 0) {
           return (
             <div>

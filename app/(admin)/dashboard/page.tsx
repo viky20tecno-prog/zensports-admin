@@ -1,7 +1,7 @@
 import { getAdminSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { adminDb } from '@/lib/supabase-admin';
-import { PLAN_PRICE, formatCOP } from '@/lib/utils';
+import { PLAN_PRICE, formatCOP, mrrDeClub } from '@/lib/utils';
 import { getClubStatus } from '@/lib/health-score';
 import { KpiCard } from '@/components/dashboard/KpiCard';
 import { MrrChart } from '@/components/dashboard/MrrChart';
@@ -57,7 +57,7 @@ async function getDashboardData() {
 
     if (status === 'active') {
       active++;
-      const planMrr = PLAN_PRICE[plan] || 0;
+      const planMrr = mrrDeClub(club.config);
       mrr += planMrr;
       if (!planCounts[plan]) planCounts[plan] = { plan, clubs: 0, mrr: 0 };
       planCounts[plan].clubs++;

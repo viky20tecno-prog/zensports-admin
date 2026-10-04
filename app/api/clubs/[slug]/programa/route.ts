@@ -47,7 +47,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
     }
     case 'asignar_fundador': {
       const numero = await asignarFundador(slug);
-      if (!numero) return NextResponse.json({ error: `Ya se usaron los ${CUPOS_FUNDADORES} cupos de fundador` }, { status: 409 });
+      if (!numero) return NextResponse.json({ error: config.sin_cobro ? 'Un club "sin cobro" no puede ser fundador' : `Ya se usaron los ${CUPOS_FUNDADORES} cupos de fundador` }, { status: 409 });
       detalle = { fundador: numero };
       break;
     }
@@ -55,6 +55,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
       const { fundador: _quitado, ...resto } = config;
       nuevo = resto;
       detalle = { fundador_quitado: config.fundador?.numero ?? null };
+      break;
+    }
+    case 'sin_cobro': {
+      nuevo = { ...config, sin_cobro: !!body.valor };
+      detalle = { sin_cobro: !!body.valor };
       break;
     }
     case 'concurso': {
