@@ -3,16 +3,9 @@ import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
 import { canAccess } from '@/lib/rbac';
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
+import { sendEmail } from '@/lib/email';
 
 async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: string, dias_restantes: number | null) {
-  if (!RESEND_API_KEY) {
-    console.warn('[reminder] RESEND_API_KEY no configurada');
-    return { ok: false };
-  }
-
   const vencido = dias_restantes !== null && dias_restantes <= 0;
   const subject = vencido
     ? `Tu prueba de ZenSports venció — activa tu plan para seguir usando la plataforma`
@@ -68,12 +61,7 @@ async function sendReminderEmail(to: string, nombre_club: string, nombre_admin: 
 </body>
 </html>`;
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
-  });
-  return { ok: res.ok };
+  return { ok: await sendEmail(to, subject, html) };
 }
 
 export async function POST(
@@ -102,7 +90,7 @@ export async function POST(
 
   const nombreAdmin = userData.user?.user_metadata?.nombre || 'Administrador';
 
-  await sendReminderEmail(
+  const { ok: sent } = await sendReminderEmail(
     email,
     club.config?.nombre || club.name,
     nombreAdmin,
@@ -114,8 +102,9 @@ export async function POST(
     action:      'PAYMENT_REMINDER_SENT',
     entity_type: 'club',
     entity_id:   slug,
-    details:     { email, dias_restantes: diasRestantes },
+    details:     { email, dias_restantes: diasRestantes, sent },
   });
 
+  if (!sent) return NextResponse.json({ error: 'No se pudo enviar el correo' }, { status: 502 });
   return NextResponse.json({ ok: true, email_sent_to: email });
 }

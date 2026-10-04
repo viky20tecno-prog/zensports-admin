@@ -3,9 +3,7 @@ import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
 import { canAccess } from '@/lib/rbac';
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zensports.co>';
+import { sendEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   const session = await getAdminSession();
@@ -31,21 +29,12 @@ export async function POST(req: Request) {
         const email = userData?.user?.email;
         if (!email) { results.push({ slug: club.slug, ok: false, error: 'Sin email' }); continue; }
 
-        let sent = false;
-        if (RESEND_API_KEY) {
-          const nombre = club.config?.nombre || club.slug;
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              from: EMAIL_FROM,
-              to: email,
-              subject: `Recordatorio: tu trial de ${nombre} está por vencer`,
-              html: `<p>Hola, tu período de prueba en <strong>${nombre}</strong> está próximo a vencer. Activa tu plan para seguir usando ZenSports sin interrupciones.</p>`,
-            }),
-          });
-          sent = res.ok;
-        }
+        const nombre = club.config?.nombre || club.slug;
+        const sent = await sendEmail(
+          email,
+          `Recordatorio: tu trial de ${nombre} está por vencer`,
+          `<p>Hola, tu período de prueba en <strong>${nombre}</strong> está próximo a vencer. Activa tu plan para seguir usando ZenSports sin interrupciones.</p>`,
+        );
 
         await writeAuditLog({
           admin_email: session.email,
@@ -55,7 +44,7 @@ export async function POST(req: Request) {
           details: { email, bulk: true, sent },
         });
 
-        results.push({ slug: club.slug, ok: true });
+        results.push(sent ? { slug: club.slug, ok: true } : { slug: club.slug, ok: false, error: 'No se pudo enviar el correo' });
       } catch (e) {
         results.push({ slug: club.slug, ok: false, error: String(e) });
       }

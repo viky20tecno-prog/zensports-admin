@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Plus, X, TrendingUp, Pencil, Trash2, Check, Link2, Copy, CircleDollarSign } from 'lucide-react';
+import { Plus, X, TrendingUp, Pencil, Trash2, Check, Link2, Copy, CircleDollarSign, FileText, Mail } from 'lucide-react';
 import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
 import type { BillingRecord, ClubFullDetail } from '@/types/club';
 
@@ -104,6 +104,18 @@ export function BillingTab({ detail, initialRecords }: Props) {
       const json = await res.json().catch(() => ({}));
       setBoldError(json.error || 'Error generando el link');
     }
+  }
+
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  async function enviarCuentaCobro(r: BillingRecord) {
+    const label = r.estado === 'pagado' ? 'la constancia de pago' : 'la cuenta de cobro';
+    if (!window.confirm(`¿Enviar ${label} de ${formatCOP(r.monto)} al correo del administrador del club?`)) return;
+    setSendingId(r.id);
+    const res = await fetch(`/api/clubs/${detail.slug}/billing/${r.id}/cuenta-cobro`, { method: 'POST' });
+    setSendingId(null);
+    const json = await res.json().catch(() => ({}));
+    alert(res.ok ? `Enviada a ${json.email_sent_to}` : (json.error || 'Error al enviar'));
   }
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -408,6 +420,14 @@ export function BillingTab({ detail, initialRecords }: Props) {
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                         )}
+                        <a href={`/api/clubs/${detail.slug}/billing/${r.id}/cuenta-cobro`} target="_blank" rel="noopener" title="Cuenta de cobro (PDF)"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors">
+                          <FileText className="w-3.5 h-3.5" />
+                        </a>
+                        <button onClick={() => enviarCuentaCobro(r)} disabled={sendingId === r.id} title="Enviar cuenta de cobro por correo"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors disabled:opacity-50">
+                          <Mail className="w-3.5 h-3.5" />
+                        </button>
                         <button onClick={() => startEdit(r)} title="Editar"
                           className="p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
                           <Pencil className="w-3.5 h-3.5" />

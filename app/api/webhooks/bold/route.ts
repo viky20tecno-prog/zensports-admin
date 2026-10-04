@@ -4,6 +4,8 @@ import { verificarFirmaBold } from '@/lib/bold';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { buildModulosForPlan } from '@/lib/plan-modules';
 import type { ClubPlan } from '@/types/club';
+import { cargarCuentaCobro, asuntoCuentaCobro } from '@/lib/cuenta-cobro';
+import { sendCuentaCobroEmail } from '@/lib/email';
 
 // Bold espera 200 en máx. 2s y reintenta hasta 5 veces (15min/1h/4h/8h/24h) si no lo recibe.
 // El UPDATE de abajo ya es idempotente por sí solo (pasar estado a 'pagado' dos veces no
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
     .update({ estado: 'pagado' })
     .eq('bold_reference', reference)
     .neq('estado', 'pagado')
-    .select('club_slug, plan_solicitado');
+    .select('id, club_slug, plan_solicitado');
 
   if (error) {
     console.error('[webhook/bold] error actualizando admin_billing:', error.message);
@@ -65,6 +67,20 @@ export async function POST(req: NextRequest) {
       if (planError) {
         console.error('[webhook/bold] error activando plan autoservicio:', planError.message);
       }
+    }
+  }
+
+  // Constancia de pago al dueño del club. Solo corre la primera vez que la fila
+  // pasa a 'pagado' (el UPDATE de arriba no devuelve filas en los reintentos de
+  // Bold), así que no se duplica el correo. Un fallo acá no debe tumbar el webhook.
+  if (row) {
+    try {
+      const cc = await cargarCuentaCobro(row.id);
+      if (cc?.ownerEmail) {
+        await sendCuentaCobroEmail(cc.ownerEmail, asuntoCuentaCobro(cc.record, cc.input.clubNombre), cc.html);
+      }
+    } catch (err) {
+      console.error('[webhook/bold] error enviando constancia de pago:', err instanceof Error ? err.message : err);
     }
   }
 

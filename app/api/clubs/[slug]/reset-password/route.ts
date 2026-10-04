@@ -3,9 +3,7 @@ import { getAdminSession } from '@/lib/auth';
 import { adminDb } from '@/lib/supabase-admin';
 import { writeAuditLog } from '@/lib/audit';
 import { canAccess } from '@/lib/rbac';
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'ZenSports <noreply@zenpra.ai>';
+import { sendEmail } from '@/lib/email';
 
 export async function POST(
   _req: Request,
@@ -37,7 +35,7 @@ export async function POST(
   const resetLink = (linkData as any).properties?.action_link as string;
 
   let emailSent = false;
-  if (RESEND_API_KEY && resetLink) {
+  if (resetLink) {
     const nombreAdmin = userData?.user?.user_metadata?.nombre || 'Administrador';
     const nombreClub  = club.config?.nombre || club.name || slug;
 
@@ -72,12 +70,7 @@ export async function POST(
 </body>
 </html>`;
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: EMAIL_FROM, to: email, subject: 'Restablece tu contraseña en ZenSports', html }),
-    });
-    emailSent = res.ok;
+    emailSent = await sendEmail(email, 'Restablece tu contraseña en ZenSports', html);
   }
 
   await writeAuditLog({

@@ -21,6 +21,7 @@ export type AuditAction =
   | 'BILLING_EDITED'
   | 'BILLING_DELETED'
   | 'BOLD_LINK_CREATED'
+  | 'CUENTA_COBRO_SENT'
   | 'IMPERSONATE'
   | 'STAFF_ADDED'
   | 'STAFF_REMOVED'
