@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { Plus, X, TrendingUp, Pencil, Trash2, Check, Link2, Copy, CircleDollarSign, FileText, Mail } from 'lucide-react';
-import { formatCOP, formatDate, PLAN_PRICE } from '@/lib/utils';
+import { formatCOP, formatDate, PLAN_PRICE, PLAN_PRICE_ANUAL } from '@/lib/utils';
 import type { BillingRecord, ClubFullDetail } from '@/types/club';
+import { ProgramaPanel } from './ProgramaPanel';
 
 const MESES_ES: Record<string, string> = {
   '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril',
@@ -71,9 +72,13 @@ export function BillingTab({ detail, initialRecords }: Props) {
   const [showBoldForm, setShowBoldForm] = useState(false);
   const [boldPeriodo, setBoldPeriodo] = useState(currentPeriodo);
   const [boldMontoOverride, setBoldMontoOverride] = useState('');
+  const [boldAnual, setBoldAnual] = useState(false);
   const [boldDescuentoPct, setBoldDescuentoPct] = useState('');
   const [boldDescuentoMotivo, setBoldDescuentoMotivo] = useState('');
-  const boldMontoBase = Number(boldMontoOverride) || planPrice;
+  const planPriceAnual = PLAN_PRICE_ANUAL[detail.config.plan] ?? 0;
+  const boldMontoBase = Number(boldMontoOverride) || (boldAnual ? planPriceAnual : planPrice);
+  // Anual = 'AAAA-anual': así lo reconocen la cuenta de cobro y el webhook (Plan Fundadores).
+  const boldPeriodoFinal = boldAnual ? `${boldPeriodo.slice(0, 4)}-anual` : boldPeriodo;
   const boldPct = Math.min(Math.max(Number(boldDescuentoPct) || 0, 0), 100);
   const boldMontoFinal = Math.round(boldMontoBase * (1 - boldPct / 100));
   const [boldActivarPlan, setBoldActivarPlan] = useState(false);
@@ -92,8 +97,8 @@ export function BillingTab({ detail, initialRecords }: Props) {
   async function handleGenerarLinkBold() {
     setBoldGenerating(true);
     setBoldError('');
-    const body: { periodo: string; monto?: number; plan_solicitado?: string; descuento_motivo?: string } = { periodo: boldPeriodo };
-    if (boldMontoOverride || boldPct) body.monto = boldMontoFinal;
+    const body: { periodo: string; monto?: number; plan_solicitado?: string; descuento_motivo?: string } = { periodo: boldPeriodoFinal };
+    if (boldMontoOverride || boldPct || boldAnual) body.monto = boldMontoFinal;
     if (boldPct) body.descuento_motivo = boldDescuentoMotivo.trim() || 'Descuento';
     if (boldActivarPlan) body.plan_solicitado = boldPlanSolicitado;
     const res = await fetch(`/api/clubs/${detail.slug}/billing/bold-link`, {
@@ -205,6 +210,8 @@ export function BillingTab({ detail, initialRecords }: Props) {
       </div>
 
       {/* Header + add button */}
+      <ProgramaPanel detail={detail} onRecord={r => setRecords(prev => [r, ...prev])} />
+
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Historial de suscripción
@@ -242,16 +249,20 @@ export function BillingTab({ detail, initialRecords }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Monto (plan {detail.config.plan}: {formatCOP(planPrice)})</label>
+              <label className="block text-xs text-gray-500 mb-1">Monto (plan {detail.config.plan}: {formatCOP(boldAnual ? planPriceAnual : planPrice)}{boldAnual ? '/año' : ''})</label>
               <input
                 type="number"
                 value={boldMontoOverride}
                 onChange={e => setBoldMontoOverride(e.target.value)}
-                placeholder={String(planPrice)}
+                placeholder={String(boldAnual ? planPriceAnual : planPrice)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-emerald-500/50"
               />
             </div>
           </div>
+          <label className="flex items-center gap-2 text-xs text-gray-400">
+            <input type="checkbox" checked={boldAnual} onChange={e => setBoldAnual(e.target.checked)} disabled={!planPriceAnual} />
+            Pago anual {boldPeriodo.slice(0, 4)} — 12 meses por el precio de 10 (da cupo de fundador si quedan)
+          </label>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Descuento (%)</label>

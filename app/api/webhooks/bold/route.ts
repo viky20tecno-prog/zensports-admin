@@ -6,6 +6,7 @@ import { buildModulosForPlan } from '@/lib/plan-modules';
 import type { ClubPlan } from '@/types/club';
 import { cargarCuentaCobro, asuntoCuentaCobro } from '@/lib/cuenta-cobro';
 import { sendCuentaCobroEmail } from '@/lib/email';
+import { aplicarProgramaPorPagoAnual } from '@/lib/programa';
 
 // Bold espera 200 en máx. 2s y reintenta hasta 5 veces (15min/1h/4h/8h/24h) si no lo recibe.
 // El UPDATE de abajo ya es idempotente por sí solo (pasar estado a 'pagado' dos veces no
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     .update({ estado: 'pagado' })
     .eq('bold_reference', reference)
     .neq('estado', 'pagado')
-    .select('id, club_slug, plan_solicitado');
+    .select('id, club_slug, plan_solicitado, periodo');
 
   if (error) {
     console.error('[webhook/bold] error actualizando admin_billing:', error.message);
@@ -67,6 +68,17 @@ export async function POST(req: NextRequest) {
       if (planError) {
         console.error('[webhook/bold] error activando plan autoservicio:', planError.message);
       }
+    }
+  }
+
+  // Plan Fundadores / Referidos: pagar el anual da cupo de fundador (si quedan)
+  // y, si el club vino referido, un mes gratis al que lo refirió. Idempotente.
+  if (row?.periodo?.includes('anual')) {
+    try {
+      const r = await aplicarProgramaPorPagoAnual(row.club_slug);
+      console.log('[webhook/bold] programa:', row.club_slug, JSON.stringify(r));
+    } catch (err) {
+      console.error('[webhook/bold] error aplicando programa fundadores/referidos:', err instanceof Error ? err.message : err);
     }
   }
 
