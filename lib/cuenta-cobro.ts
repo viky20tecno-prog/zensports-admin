@@ -115,7 +115,7 @@ export function renderCuentaCobro({ record, clubNombre, clubCiudad, planActual }
   <table width="100%" cellpadding="0" cellspacing="0"><tr>
     <td style="vertical-align:top;">
       <table cellpadding="0" cellspacing="0"><tr>
-        <td style="vertical-align:middle;padding-right:10px;"><img src="https://zensports.zenpra.ai/brand/zensports-z.png" width="40" height="38" alt="ZenSports" style="display:block;border:0;"></td>
+        <td style="vertical-align:middle;padding-right:10px;"><img src="https://zensports.zenpra.ai/brand/zensports-z.png" width="40" height="40" alt="ZenSports" style="display:block;border:0;"></td>
         <td style="vertical-align:middle;">
           <div style="font-size:22px;font-weight:900;letter-spacing:2px;color:#14141F;line-height:1;">ZEN<span style="color:#6A00FF;">SPORTS</span></div>
           <div style="font-size:11px;color:#6B6B80;margin-top:4px;">zensports.zenpra.ai · ${esc(EMISOR.email)}</div>
