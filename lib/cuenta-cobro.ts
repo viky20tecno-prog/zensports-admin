@@ -1,6 +1,6 @@
 import 'server-only';
 import { adminDb } from '@/lib/supabase-admin';
-import { formatCOP } from '@/lib/utils';
+import { formatCOP, PLAN_PRICE, PLAN_PRICE_ANUAL } from '@/lib/utils';
 import type { BillingRecord } from '@/types/club';
 
 // Datos del emisor de la cuenta de cobro. ZenSports todavía no tiene NIT:
@@ -85,8 +85,16 @@ export function renderCuentaCobro({ record, clubNombre, clubCiudad, planActual }
   const pagado = record.estado === 'pagado';
   const plan = (record.plan_solicitado || planActual || '').toString();
   const planTxt = plan ? `Plan ${plan.charAt(0).toUpperCase()}${plan.slice(1)}` : '';
-  const concepto = `Servicio de acceso y uso de la plataforma de software ZenSports (software como servicio)${planTxt ? ` — ${planTxt}` : ''} — período ${describirPeriodo(record.periodo)}.`;
+  const concepto = `Servicio de acceso y uso de la plataforma de software ZenSports (software como servicio)${planTxt ? ` — ${planTxt}` : ''}.`;
   const numero = numeroCuentaCobro(record);
+
+  // Descuento: si el monto quedó por debajo del precio de lista del plan, se
+  // muestra el desglose. El motivo sale de las notas solo si empiezan por
+  // "Descuento" (las notas de un pago manual pueden ser internas).
+  const precioLista = (record.periodo.includes('anual') ? PLAN_PRICE_ANUAL[plan] : PLAN_PRICE[plan]) || 0;
+  const descuento = precioLista > record.monto ? precioLista - record.monto : 0;
+  const motivoDescuento = /^descuento/i.test(record.notas?.trim() || '') ? record.notas!.trim() : 'Descuento';
+  const pctDescuento = descuento ? Math.round((descuento / precioLista) * 100) : 0;
 
   const fila = (k: string, v: string) =>
     `<tr><td style="padding:6px 0;color:#6B6B80;font-size:13px;width:150px;vertical-align:top;">${k}</td><td style="padding:6px 0;color:#14141F;font-size:13px;font-weight:600;">${v}</td></tr>`;
@@ -106,8 +114,13 @@ export function renderCuentaCobro({ record, clubNombre, clubCiudad, planActual }
   return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;background:#ffffff;color:#14141F;padding:40px 36px;border:1px solid #E5E5EF;border-radius:16px;">
   <table width="100%" cellpadding="0" cellspacing="0"><tr>
     <td style="vertical-align:top;">
-      <div style="font-size:22px;font-weight:900;letter-spacing:2px;color:#6A00FF;">ZENSPORTS</div>
-      <div style="font-size:11px;color:#6B6B80;margin-top:2px;">zensports.zenpra.ai · ${esc(EMISOR.email)}</div>
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="vertical-align:middle;padding-right:10px;"><img src="https://zensports.zenpra.ai/brand/zensports-z.png" width="40" height="38" alt="ZenSports" style="display:block;border:0;"></td>
+        <td style="vertical-align:middle;">
+          <div style="font-size:22px;font-weight:900;letter-spacing:2px;color:#14141F;line-height:1;">ZEN<span style="color:#6A00FF;">SPORTS</span></div>
+          <div style="font-size:11px;color:#6B6B80;margin-top:4px;">zensports.zenpra.ai · ${esc(EMISOR.email)}</div>
+        </td>
+      </tr></table>
     </td>
     <td style="vertical-align:top;text-align:right;">
       <div style="font-size:11px;color:#6B6B80;text-transform:uppercase;letter-spacing:1.5px;">Cuenta de cobro</div>
@@ -125,8 +138,13 @@ export function renderCuentaCobro({ record, clubNombre, clubCiudad, planActual }
   <p style="margin:0;font-size:16px;font-weight:700;">${esc(EMISOR.nombre)}</p>
   <p style="margin:2px 0 0;font-size:13px;">${esc(EMISOR.documento)}${EMISOR.telefono ? ` · Cel. ${esc(EMISOR.telefono)}` : ''}</p>
 
-  <div style="margin:28px 0 0;padding:20px;background:#F6F2FF;border-radius:12px;">
-    <p style="margin:0 0 4px;font-size:13px;color:#6B6B80;">La suma de</p>
+  ${descuento ? `<table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0 0;">
+    <tr><td style="padding:6px 0;color:#6B6B80;font-size:13px;">Valor del ${esc(planTxt || 'plan')} (${esc(describirPeriodo(record.periodo))})</td><td style="padding:6px 0;text-align:right;font-size:13px;color:#14141F;">${formatCOP(precioLista)}</td></tr>
+    <tr><td style="padding:6px 0;color:#15803D;font-size:13px;font-weight:600;">${esc(motivoDescuento)} (${pctDescuento}%)</td><td style="padding:6px 0;text-align:right;font-size:13px;color:#15803D;font-weight:600;">− ${formatCOP(descuento)}</td></tr>
+  </table>` : ''}
+
+  <div style="margin:${descuento ? '8px' : '28px'} 0 0;padding:20px;background:#F6F2FF;border-radius:12px;">
+    <p style="margin:0 0 4px;font-size:13px;color:#6B6B80;">${descuento ? 'Total a pagar' : 'La suma de'}</p>
     <p style="margin:0;font-size:28px;font-weight:900;color:#6A00FF;">${formatCOP(record.monto)}</p>
     <p style="margin:4px 0 0;font-size:12px;font-weight:600;">${pesosEnLetras(record.monto)}</p>
   </div>
@@ -141,11 +159,11 @@ export function renderCuentaCobro({ record, clubNombre, clubCiudad, planActual }
 
   <p style="margin:28px 0 0;font-size:11px;color:#6B6B80;line-height:1.6;border-top:1px solid #E5E5EF;padding-top:16px;">
     Declaro que soy persona natural no responsable del impuesto sobre las ventas (IVA) y que no estoy obligado a expedir factura de venta ni factura electrónica, conforme a la normativa tributaria vigente.
-    El servicio no incluye permanencia mínima. Los datos registrados en la plataforma pertenecen al club. Condiciones del servicio: zensports.zenpra.ai/terminos.html
+    El servicio no incluye permanencia mínima. Los datos registrados en la plataforma pertenecen al club. Condiciones del servicio: zensports.zenpra.ai/terminos
   </p>
 
   <div style="margin-top:36px;">
-    <div style="width:220px;border-top:1px solid #14141F;padding-top:6px;font-size:12px;">
+    <div style="width:300px;border-top:1px solid #14141F;padding-top:6px;font-size:12px;">
       <strong>${esc(EMISOR.nombre)}</strong><br><span style="color:#6B6B80;">${esc(EMISOR.documento)}</span>
     </div>
   </div>
@@ -172,7 +190,7 @@ export async function cargarCuentaCobro(billingId: string, slug?: string) {
   const input: CuentaCobroInput = {
     record,
     clubNombre: club.config?.nombre || club.name || record.club_slug,
-    clubCiudad: club.config?.ciudad,
+    clubCiudad: club.config?.ciudad?.trim(),
     planActual: club.config?.plan,
   };
   return { record, input, ownerEmail, html: renderCuentaCobro(input) };

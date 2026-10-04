@@ -33,6 +33,11 @@ export async function POST(
   const PLANES_VALIDOS = ['free', 'trial', 'starter', 'pro', 'scale', 'total'];
   const planSolicitado = PLANES_VALIDOS.includes(body.plan_solicitado) ? body.plan_solicitado : null;
 
+  // Motivo visible en la cuenta de cobro (ver lib/cuenta-cobro.ts). Se guarda en
+  // notas con prefijo "Descuento" para distinguirlo de notas internas.
+  const motivo = typeof body.descuento_motivo === 'string' ? body.descuento_motivo.trim().slice(0, 80) : '';
+  const notas = motivo ? (/^descuento/i.test(motivo) ? motivo : `Descuento: ${motivo}`) : null;
+
   const reference = referenciaBold(slug, periodo);
   const clubNombre = club.config?.nombre || slug;
 
@@ -61,6 +66,7 @@ export async function POST(
       bold_reference: reference,
       recorded_by: session.email,
       plan_solicitado: planSolicitado,
+      notas,
     })
     .select()
     .single();

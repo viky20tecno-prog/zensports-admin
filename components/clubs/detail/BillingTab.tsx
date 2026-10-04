@@ -71,6 +71,11 @@ export function BillingTab({ detail, initialRecords }: Props) {
   const [showBoldForm, setShowBoldForm] = useState(false);
   const [boldPeriodo, setBoldPeriodo] = useState(currentPeriodo);
   const [boldMontoOverride, setBoldMontoOverride] = useState('');
+  const [boldDescuentoPct, setBoldDescuentoPct] = useState('');
+  const [boldDescuentoMotivo, setBoldDescuentoMotivo] = useState('');
+  const boldMontoBase = Number(boldMontoOverride) || planPrice;
+  const boldPct = Math.min(Math.max(Number(boldDescuentoPct) || 0, 0), 100);
+  const boldMontoFinal = Math.round(boldMontoBase * (1 - boldPct / 100));
   const [boldActivarPlan, setBoldActivarPlan] = useState(false);
   const [boldPlanSolicitado, setBoldPlanSolicitado] = useState('starter');
   const [boldGenerating, setBoldGenerating] = useState(false);
@@ -87,8 +92,9 @@ export function BillingTab({ detail, initialRecords }: Props) {
   async function handleGenerarLinkBold() {
     setBoldGenerating(true);
     setBoldError('');
-    const body: { periodo: string; monto?: number; plan_solicitado?: string } = { periodo: boldPeriodo };
-    if (boldMontoOverride) body.monto = Number(boldMontoOverride);
+    const body: { periodo: string; monto?: number; plan_solicitado?: string; descuento_motivo?: string } = { periodo: boldPeriodo };
+    if (boldMontoOverride || boldPct) body.monto = boldMontoFinal;
+    if (boldPct) body.descuento_motivo = boldDescuentoMotivo.trim() || 'Descuento';
     if (boldActivarPlan) body.plan_solicitado = boldPlanSolicitado;
     const res = await fetch(`/api/clubs/${detail.slug}/billing/bold-link`, {
       method: 'POST',
@@ -110,9 +116,15 @@ export function BillingTab({ detail, initialRecords }: Props) {
 
   async function enviarCuentaCobro(r: BillingRecord) {
     const label = r.estado === 'pagado' ? 'la constancia de pago' : 'la cuenta de cobro';
-    if (!window.confirm(`¿Enviar ${label} de ${formatCOP(r.monto)} al correo del administrador del club?`)) return;
+    // Editable para poder mandarse una prueba antes de enviarla al club.
+    const to = window.prompt(`¿A qué correo envío ${label} de ${formatCOP(r.monto)}?\n(Por defecto, el administrador del club)`, detail.owner_email || '');
+    if (!to || !to.includes('@')) return;
     setSendingId(r.id);
-    const res = await fetch(`/api/clubs/${detail.slug}/billing/${r.id}/cuenta-cobro`, { method: 'POST' });
+    const res = await fetch(`/api/clubs/${detail.slug}/billing/${r.id}/cuenta-cobro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to.trim() }),
+    });
     setSendingId(null);
     const json = await res.json().catch(() => ({}));
     alert(res.ok ? `Enviada a ${json.email_sent_to}` : (json.error || 'Error al enviar'));
@@ -240,6 +252,36 @@ export function BillingTab({ detail, initialRecords }: Props) {
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Descuento (%)</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={boldDescuentoPct}
+                onChange={e => setBoldDescuentoPct(e.target.value)}
+                placeholder="0"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-emerald-500/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Motivo (lo ve el club)</label>
+              <input
+                type="text"
+                value={boldDescuentoMotivo}
+                onChange={e => setBoldDescuentoMotivo(e.target.value)}
+                placeholder="Descuento por fidelidad"
+                disabled={!boldPct}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-emerald-500/50 disabled:opacity-40"
+              />
+            </div>
+          </div>
+          {boldPct > 0 && (
+            <p className="text-xs text-gray-400">
+              {formatCOP(boldMontoBase)} − {boldPct}% = <span className="font-bold text-emerald-400">{formatCOP(boldMontoFinal)}</span> a pagar
+            </p>
+          )}
           <label className="flex items-center gap-2 text-xs text-gray-400">
             <input type="checkbox" checked={boldActivarPlan} onChange={e => setBoldActivarPlan(e.target.checked)} />
             Activar plan automáticamente al confirmarse el pago
